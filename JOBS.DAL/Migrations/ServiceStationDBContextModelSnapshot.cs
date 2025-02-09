@@ -81,6 +81,12 @@ namespace JOBS.DAL.Migrations
                     b.Property<Guid?>("VehicleId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("WEIPrice")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("jobIndex")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("MechanicId");
@@ -126,13 +132,17 @@ namespace JOBS.DAL.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<decimal?>("Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<string>("Task")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.HasKey("Id");
 

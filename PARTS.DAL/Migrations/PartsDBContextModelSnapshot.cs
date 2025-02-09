@@ -34,7 +34,7 @@ namespace PARTS.DAL.Migrations
 
                     b.HasIndex("PartsId");
 
-                    b.ToTable("OrderPart");
+                    b.ToTable("OrderParts", (string)null);
                 });
 
             modelBuilder.Entity("PARTS.DAL.Entities.Item.Brand", b =>
@@ -225,7 +225,12 @@ namespace PARTS.DAL.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsPaid")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int?>("OrderIndex")
+                        .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -234,6 +239,10 @@ namespace PARTS.DAL.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("TransactionHash")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("WEIPrice")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("СustomerId")

@@ -43,6 +43,7 @@ namespace ServiceCenterPayment
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Помилка під час обробки події: {ex.Message}");
+                        throw ex;
                     }
                     await Task.Delay(2000, cancellationToken);
                 }

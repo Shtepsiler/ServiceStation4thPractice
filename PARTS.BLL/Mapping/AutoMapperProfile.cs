@@ -30,12 +30,14 @@ namespace PARTS.BLL.Mapping
         {
             CreateMap<Brand, BrandRequest>().ReverseMap();
             CreateMap<Brand, BrandResponse>().ReverseMap();
+            CreateMap<BrandRequest, BrandResponse>().ReverseMap();
 
         }
         private void CreateCategoryImagerMap()
         {
             CreateMap<CategoryImage, CategoryImageRequest>().ReverseMap();
             CreateMap<CategoryImage, CategoryImageResponse>().ReverseMap();
+            CreateMap<CategoryImageRequest, CategoryImageResponse>().ReverseMap();
 
         }
 
@@ -44,6 +46,7 @@ namespace PARTS.BLL.Mapping
         {
             CreateMap<Category, CategoryRequest>().ReverseMap();
             CreateMap<Category, CategoryResponse>().ReverseMap();
+            CreateMap<CategoryRequest, CategoryResponse>().ReverseMap();
 
         }
 
@@ -51,6 +54,7 @@ namespace PARTS.BLL.Mapping
         {
             CreateMap<Engine, EngineRequest>().ReverseMap();
             CreateMap<Engine, EngineResponse>().ReverseMap();
+            CreateMap<EngineRequest, EngineResponse>().ReverseMap();
 
         }
 
@@ -58,6 +62,7 @@ namespace PARTS.BLL.Mapping
         {
             CreateMap<Make, MakeRequest>().ReverseMap();
             CreateMap<Make, MakeResponse>().ReverseMap();
+            CreateMap<MakeRequest, MakeResponse>().ReverseMap();
 
         }
 
@@ -65,6 +70,7 @@ namespace PARTS.BLL.Mapping
         {
             CreateMap<Model, ModelRequest>().ReverseMap();
             CreateMap<Model, ModelResponse>().ReverseMap();
+            CreateMap<ModelRequest, ModelResponse>().ReverseMap();
 
         }
 
@@ -72,6 +78,7 @@ namespace PARTS.BLL.Mapping
         {
             CreateMap<PartImage, PartImageRequest>().ReverseMap();
             CreateMap<PartImage, PartImageResponse>().ReverseMap();
+            CreateMap<PartImageRequest, PartImageResponse>().ReverseMap();
 
         }
 
@@ -79,6 +86,7 @@ namespace PARTS.BLL.Mapping
         {
             CreateMap<Part, PartRequest>().ReverseMap();
             CreateMap<Part, PartResponse>().ReverseMap();
+            CreateMap<PartRequest, PartResponse>().ReverseMap();
 
         }
 
@@ -86,19 +94,23 @@ namespace PARTS.BLL.Mapping
         {
             CreateMap<SubModel, SubModelRequest>().ReverseMap();
             CreateMap<SubModel, SubModelResponse>().ReverseMap();
+            CreateMap<SubModelRequest, SubModelResponse>().ReverseMap();
 
         }
 
         private void CreateVehicleMap()
         {
             CreateMap<Vehicle, VehicleRequest>().ReverseMap();
-            CreateMap<Vehicle, VehicleResponse>().ReverseMap();
+            CreateMap<Vehicle, VehicleResponse>().ReverseMap(); 
+            CreateMap<VehicleRequest, VehicleResponse>().ReverseMap();
 
         }
         private void CreateOrderMap()
         {
             CreateMap<Order, OrderRequest>().ReverseMap();
             CreateMap<Order, OrderResponse>().ReverseMap();
+            CreateMap<OrderRequest, OrderResponse>().ReverseMap();
+
 
         }
 

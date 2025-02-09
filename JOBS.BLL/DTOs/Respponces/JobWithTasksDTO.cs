@@ -27,6 +27,9 @@ namespace JOBS.BLL.DTOs.Respponces
         public string Description { get; set; }
         public decimal? Price { get; set; }
         public float? ModelConfidence { get; set; } = null;
+        public int jobIndex { get; set; }
+        public bool IsPaid { get; set; }
+        public string? WEIPrice { get; set; }
 
         public List<MechanicsTasksDTO> Tasks { get; set; }
 

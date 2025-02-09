@@ -5,7 +5,7 @@ using System.Text;
 public class AISeeder<T> where T : new()
 {
     private static readonly HttpClient client = new HttpClient();
-    private const string apiKey = "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";
+    private const string apiKey = "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";
     private const string apiEndpoint = "https://api.openai.com/v1/chat/completions";
      
     public AISeeder()

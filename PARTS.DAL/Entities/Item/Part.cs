@@ -1,4 +1,6 @@
-﻿namespace PARTS.DAL.Entities.Item
+﻿using System.Text.Json.Serialization;
+
+namespace PARTS.DAL.Entities.Item
 {
     public class Part : Base
     {
@@ -18,10 +20,10 @@
         public Guid? PartImageId { get; set; }
 
 
-        public Brand? Brand { get; set; }
-        public Category? Category { get; set; }
-        public PartImage? PartImage { get; set; }
-        public List<Order> Orders { get; set; } = new List<Order>();
+        [JsonIgnore] public Brand? Brand { get; set; }
+        [JsonIgnore] public Category? Category { get; set; }
+        [JsonIgnore] public PartImage? PartImage { get; set; }
+        [JsonIgnore] public List<Order> Orders { get; set; } = new List<Order>();
 
     }
 }

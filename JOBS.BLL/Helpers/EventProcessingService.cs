@@ -19,19 +19,16 @@ namespace JOBS.BLL.Helpers
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly EventListener<JobCreatedEventDTO> _jobCreatedListener;
+        private readonly EventListener<JobUpdatedEventDTO> _jobUpdateddListener;
         private readonly EventListener<JobPaidEventDTO> _jobPaidListener;
         public EventProcessingService(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
 
-            // Дані для підключення до блокчейну
-            string rpcUrl = Environment.GetEnvironmentVariable("infuraUrl"); ;
-            string contractAddress = Environment.GetEnvironmentVariable("deployedContractAddress"); ;
-            string privateKey = Environment.GetEnvironmentVariable("privateKey"); ;
-
             // Створюємо слухачі для подій OrderCreated та OrderPaid
             var configMonitor = serviceProvider.GetRequiredService<IOptionsMonitor<Web3Config>>();
             _jobCreatedListener = new EventListener<JobCreatedEventDTO>(configMonitor);
+            _jobUpdateddListener = new EventListener<JobUpdatedEventDTO>(configMonitor);
             _jobPaidListener = new EventListener<JobPaidEventDTO>(configMonitor);
         }
 
@@ -41,45 +38,62 @@ namespace JOBS.BLL.Helpers
 
             // Запускаємо слухачі подій
             _ = _jobCreatedListener.StartListeningAsync(HandleJobCreated, stoppingToken);
+            _ = _jobUpdateddListener.StartListeningAsync(HandleJobUpdated, stoppingToken);
             _ = _jobPaidListener.StartListeningAsync(HandleJobPaid, stoppingToken);
         }
 
-        private async void HandleJobCreated(JobCreatedEventDTO orderEvent)
+        private async void HandleJobCreated(JobCreatedEventDTO jobEvent)
         {
-            Console.WriteLine($"📌 Нова подія JobCreated: JobId = {orderEvent.JobId}, CustomerId = {orderEvent.UserId}");
+            Console.WriteLine($"📌 Нова подія JobCreated: JobId = {jobEvent.JobId}, CustomerId = {jobEvent.UserId}");
 
             using (var scope = _serviceProvider.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<ServiceStationDBContext>();
-                var order = dbContext.Jobs.FirstOrDefault(p => p.Id == Guid.Parse(orderEvent.JobId));
-                if (order != null)
+                var job = dbContext.Jobs.FirstOrDefault(p => p.Id == Guid.Parse(jobEvent.JobId));
+                if (job != null)
                 {
-                   
+                    job.jobIndex = (int)jobEvent.JobIndex;
+                    
                 }
                 await dbContext.SaveChangesAsync();
-                Console.WriteLine("✅ Замовлення додано до бази даних!");
+                Console.WriteLine("✅ Роботу додано до бази даних!");
             }
         }
 
-        private async void HandleJobPaid(JobPaidEventDTO orderEvent)
+        private async void HandleJobUpdated(JobUpdatedEventDTO jobEvent)
         {
-            Console.WriteLine($"💰 Замовлення {orderEvent.JobId} оплачено, : {orderEvent.Amount}");
+            Console.WriteLine($"📌 Нова подія JobCreated: JobId = {jobEvent.JobId}, CustomerId = {jobEvent.UserId}");
+
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<ServiceStationDBContext>();
+                var job = dbContext.Jobs.FirstOrDefault(p => p.Id == Guid.Parse(jobEvent.JobId));
+                if (job != null)
+                {
+
+                }
+                //await dbContext.SaveChangesAsync();
+                Console.WriteLine("✅ Роботу змінено!");
+            }
+        }
+        private async void HandleJobPaid(JobPaidEventDTO jobEvent)
+        {
+            Console.WriteLine($"💰 Роботу {jobEvent.JobId} оплачено, : {jobEvent.Amount}");
 
             using (var scope = _serviceProvider.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<ServiceStationDBContext>();
 
-                var order = await dbContext.Jobs.FirstOrDefaultAsync(o => o.Id == Guid.Parse(orderEvent.JobId));
-                if (order != null)
+                var job = await dbContext.Jobs.FirstOrDefaultAsync(o => o.Id == Guid.Parse(jobEvent.JobId));
+                if (job != null)
                 {
-                    order.IsPaid = true;
-                    order.Status = Status.Completed;
+                    job.IsPaid = true;
                     await dbContext.SaveChangesAsync();
-                    Console.WriteLine("✅ Статус замовлення оновлено у базі!");
+                    Console.WriteLine("✅ Статус роботи оновлено у базі!");
                 }
                 else
                 {
-                    Console.WriteLine("⚠️ Замовлення не знайдено!");
+                    Console.WriteLine("⚠️ Роботу не знайдено!");
                 }
             }
         }

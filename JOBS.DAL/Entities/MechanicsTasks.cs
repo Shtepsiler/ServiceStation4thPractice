@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Numerics;
 
 namespace JOBS.DAL.Entities
 {
@@ -13,6 +14,7 @@ namespace JOBS.DAL.Entities
         public Job? Job { get; set; }
         public string Task { get; set; }
         public Status Status { get; set; }
+        public decimal? Price { get; set; }  
         public Mechanic Mechanic { get; set; }
     }
 

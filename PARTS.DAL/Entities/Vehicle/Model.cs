@@ -1,4 +1,6 @@
-﻿namespace PARTS.DAL.Entities.Vehicle
+﻿using System.Text.Json.Serialization;
+
+namespace PARTS.DAL.Entities.Vehicle
 {
     public class Model : Base
     {
@@ -7,9 +9,9 @@
         public string? Seats { get; set; }
         public string? Doors { get; set; }
         public DateTime? Year { get; set; }
-        public Make? Make { get; set; }
-        public List<Vehicle>? Vehicles { get; set; } = new List<Vehicle>();
-        public List<SubModel>? SubModels { get; set; } = new List<SubModel>();
+        [JsonIgnore] public Make? Make { get; set; }
+        [JsonIgnore] public List<Vehicle>? Vehicles { get; set; } = new List<Vehicle>();
+        [JsonIgnore] public List<SubModel>? SubModels { get; set; } = new List<SubModel>();
 
     }
 }

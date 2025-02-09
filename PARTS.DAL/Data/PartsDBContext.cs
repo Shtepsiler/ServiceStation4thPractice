@@ -16,9 +16,7 @@ namespace PARTS.DAL.Data
 
         public PartsDBContext(DbContextOptions contextOptions) : base(contextOptions)
         {
- 
                 Database.EnsureCreated();
-//              var scr =   Database.GenerateCreateScript();
 
         }
 

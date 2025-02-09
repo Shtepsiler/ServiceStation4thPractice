@@ -146,7 +146,7 @@ services:
         - 2070:8000
 
   bloc.chain:
-    container_name: bloc.chain
+    container_name: blocchain
     image: ${DOCKER_REGISTRY-}bchnet
     networks:
       - ServiceStationPartsNetwork

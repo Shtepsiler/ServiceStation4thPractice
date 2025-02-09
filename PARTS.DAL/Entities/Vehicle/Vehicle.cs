@@ -1,4 +1,5 @@
 ﻿using PARTS.DAL.Entities.Item;
+using System.Text.Json.Serialization;
 
 namespace PARTS.DAL.Entities.Vehicle
 {
@@ -22,14 +23,17 @@ namespace PARTS.DAL.Entities.Vehicle
         public Guid? ModelId { get; set; }
         public Guid? SubModelId { get; set; }
         public Guid? EngineId { get; set; }
-
+        [JsonIgnore]
         public Make? Make { get; set; }
+        [JsonIgnore]
         public Model? Model { get; set; }
+        [JsonIgnore]
         public SubModel? SubModel { get; set; }
+        [JsonIgnore]
         public Engine? Engine { get; set; }
 
         public string? URL { get; set; }
-
+        [JsonIgnore]
         public List<Part>? Parts { get; set; } = new List<Part>();
     }
 }

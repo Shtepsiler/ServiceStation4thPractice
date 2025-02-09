@@ -102,12 +102,12 @@ namespace ClientPartAPI.Controllers
         }
 
         [HttpGet("GetNewOrder")]
-        public async Task<ActionResult<OrderResponse>> GetNewOrderAsync()
+        public async Task<ActionResult<OrderResponse>> GetNewOrderAsync([FromQuery] Guid userId)
         {
             try
             { 
 
-                var neworder = new OrderRequest() {Id = Guid.NewGuid(),Timestamp = DateTime.Now};
+                var neworder = new OrderRequest() {Id = Guid.NewGuid(),Timestamp = DateTime.Now,СustomerId = userId};
                 await orderService.PostAsync(neworder);
                 if (neworder == null)
                 {

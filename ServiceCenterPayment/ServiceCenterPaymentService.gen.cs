@@ -39,7 +39,7 @@ namespace ServiceCenterPayment
     }
 
 
-    public partial class ServiceCenterPaymentServiceBase : ContractWeb3ServiceBase
+    public partial class ServiceCenterPaymentServiceBase : ContractWeb3ServiceBase, IServiceCenterPaymentServiceBase
     {
 
         public ServiceCenterPaymentServiceBase(IWeb3 web3, string contractAddress) : base(web3, contractAddress)
@@ -56,10 +56,9 @@ namespace ServiceCenterPayment
             return ContractHandler.SendRequestAndWaitForReceiptAsync(addJobFunction, cancellationToken);
         }
 
-        public virtual Task<string> AddJobRequestAsync(BigInteger jobIndex, string userId, string jobId, BigInteger price)
+        public virtual Task<string> AddJobRequestAsync(string userId, string jobId, BigInteger price)
         {
             var addJobFunction = new AddJobFunction();
-            addJobFunction.JobIndex = jobIndex;
             addJobFunction.UserId = userId;
             addJobFunction.JobId = jobId;
             addJobFunction.Price = price;
@@ -67,10 +66,9 @@ namespace ServiceCenterPayment
             return ContractHandler.SendRequestAsync(addJobFunction);
         }
 
-        public virtual Task<TransactionReceipt> AddJobRequestAndWaitForReceiptAsync(BigInteger jobIndex, string userId, string jobId, BigInteger price, CancellationTokenSource cancellationToken = null)
+        public virtual Task<TransactionReceipt> AddJobRequestAndWaitForReceiptAsync(string userId, string jobId, BigInteger price, CancellationTokenSource cancellationToken = null)
         {
             var addJobFunction = new AddJobFunction();
-            addJobFunction.JobIndex = jobIndex;
             addJobFunction.UserId = userId;
             addJobFunction.JobId = jobId;
             addJobFunction.Price = price;
@@ -88,10 +86,9 @@ namespace ServiceCenterPayment
             return ContractHandler.SendRequestAndWaitForReceiptAsync(addOrderFunction, cancellationToken);
         }
 
-        public virtual Task<string> AddOrderRequestAsync(BigInteger orderIndex, string userId, string orderId, BigInteger price)
+        public virtual Task<string> AddOrderRequestAsync(string userId, string orderId, BigInteger price)
         {
             var addOrderFunction = new AddOrderFunction();
-            addOrderFunction.OrderIndex = orderIndex;
             addOrderFunction.UserId = userId;
             addOrderFunction.OrderId = orderId;
             addOrderFunction.Price = price;
@@ -99,10 +96,9 @@ namespace ServiceCenterPayment
             return ContractHandler.SendRequestAsync(addOrderFunction);
         }
 
-        public virtual Task<TransactionReceipt> AddOrderRequestAndWaitForReceiptAsync(BigInteger orderIndex, string userId, string orderId, BigInteger price, CancellationTokenSource cancellationToken = null)
+        public virtual Task<TransactionReceipt> AddOrderRequestAndWaitForReceiptAsync(string userId, string orderId, BigInteger price, CancellationTokenSource cancellationToken = null)
         {
             var addOrderFunction = new AddOrderFunction();
-            addOrderFunction.OrderIndex = orderIndex;
             addOrderFunction.UserId = userId;
             addOrderFunction.OrderId = orderId;
             addOrderFunction.Price = price;
@@ -245,6 +241,70 @@ namespace ServiceCenterPayment
             return ContractHandler.SendRequestAndWaitForReceiptAsync(transferOwnershipFunction, cancellationToken);
         }
 
+        public virtual Task<string> UpdateJobRequestAsync(UpdateJobFunction updateJobFunction)
+        {
+            return ContractHandler.SendRequestAsync(updateJobFunction);
+        }
+
+        public virtual Task<TransactionReceipt> UpdateJobRequestAndWaitForReceiptAsync(UpdateJobFunction updateJobFunction, CancellationTokenSource cancellationToken = null)
+        {
+            return ContractHandler.SendRequestAndWaitForReceiptAsync(updateJobFunction, cancellationToken);
+        }
+
+        public virtual Task<string> UpdateJobRequestAsync(BigInteger jobIndex, string userId, string jobId, BigInteger price)
+        {
+            var updateJobFunction = new UpdateJobFunction();
+            updateJobFunction.JobIndex = jobIndex;
+            updateJobFunction.UserId = userId;
+            updateJobFunction.JobId = jobId;
+            updateJobFunction.Price = price;
+
+            return ContractHandler.SendRequestAsync(updateJobFunction);
+        }
+
+        public virtual Task<TransactionReceipt> UpdateJobRequestAndWaitForReceiptAsync(BigInteger jobIndex, string userId, string jobId, BigInteger price, CancellationTokenSource cancellationToken = null)
+        {
+            var updateJobFunction = new UpdateJobFunction();
+            updateJobFunction.JobIndex = jobIndex;
+            updateJobFunction.UserId = userId;
+            updateJobFunction.JobId = jobId;
+            updateJobFunction.Price = price;
+
+            return ContractHandler.SendRequestAndWaitForReceiptAsync(updateJobFunction, cancellationToken);
+        }
+
+        public virtual Task<string> UpdateOrderRequestAsync(UpdateOrderFunction updateOrderFunction)
+        {
+            return ContractHandler.SendRequestAsync(updateOrderFunction);
+        }
+
+        public virtual Task<TransactionReceipt> UpdateOrderRequestAndWaitForReceiptAsync(UpdateOrderFunction updateOrderFunction, CancellationTokenSource cancellationToken = null)
+        {
+            return ContractHandler.SendRequestAndWaitForReceiptAsync(updateOrderFunction, cancellationToken);
+        }
+
+        public virtual Task<string> UpdateOrderRequestAsync(BigInteger orderIndex, string userId, string orderId, BigInteger price)
+        {
+            var updateOrderFunction = new UpdateOrderFunction();
+            updateOrderFunction.OrderIndex = orderIndex;
+            updateOrderFunction.UserId = userId;
+            updateOrderFunction.OrderId = orderId;
+            updateOrderFunction.Price = price;
+
+            return ContractHandler.SendRequestAsync(updateOrderFunction);
+        }
+
+        public virtual Task<TransactionReceipt> UpdateOrderRequestAndWaitForReceiptAsync(BigInteger orderIndex, string userId, string orderId, BigInteger price, CancellationTokenSource cancellationToken = null)
+        {
+            var updateOrderFunction = new UpdateOrderFunction();
+            updateOrderFunction.OrderIndex = orderIndex;
+            updateOrderFunction.UserId = userId;
+            updateOrderFunction.OrderId = orderId;
+            updateOrderFunction.Price = price;
+
+            return ContractHandler.SendRequestAndWaitForReceiptAsync(updateOrderFunction, cancellationToken);
+        }
+
         public virtual Task<string> WithdrawRequestAsync(WithdrawFunction withdrawFunction)
         {
             return ContractHandler.SendRequestAsync(withdrawFunction);
@@ -284,6 +344,8 @@ namespace ServiceCenterPayment
                 typeof(PayOrderFunction),
                 typeof(RenounceOwnershipFunction),
                 typeof(TransferOwnershipFunction),
+                typeof(UpdateJobFunction),
+                typeof(UpdateOrderFunction),
                 typeof(WithdrawFunction)
             };
         }
@@ -294,8 +356,10 @@ namespace ServiceCenterPayment
             {
                 typeof(JobCreatedEventDTO),
                 typeof(JobPaidEventDTO),
+                typeof(JobUpdatedEventDTO),
                 typeof(OrderCreatedEventDTO),
                 typeof(OrderPaidEventDTO),
+                typeof(OrderUpdatedEventDTO),
                 typeof(OwnershipTransferredEventDTO)
             };
         }

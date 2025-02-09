@@ -32,6 +32,9 @@ namespace JOBS.DAL.Data.Configurations
             builder.Property(p => p.TransactionHash).HasMaxLength(256);
             builder.Property(p => p.ModelConfidence).IsRequired(false);
             builder.Property(p => p.ModelAproved).HasDefaultValue(false);
+            builder.Property(p=>p.jobIndex).IsRequired(false);
+            builder.Property(p=>p.WEIPrice).IsRequired(false);
+
 
             builder.HasOne(p => p.Mechanic)
                    .WithMany(m => m.Jobs)

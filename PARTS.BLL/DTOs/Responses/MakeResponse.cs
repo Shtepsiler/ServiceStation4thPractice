@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
 namespace PARTS.BLL.DTOs.Responses
 {
@@ -8,7 +8,12 @@ namespace PARTS.BLL.DTOs.Responses
         public string? Description { get; set; }
         public DateTime? Year { get; set; }
         [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+
         public List<VehicleResponse>? Vehicles { get; set; }
+        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+
         public List<ModelResponse>? Models { get; set; }
     }
 }

@@ -222,10 +222,10 @@ namespace PARTS.DAL.Seeders
                     VIN = "asd1w1we1e1ennfdew",
                     Year = DateTime.Now.AddYears(-10),
                     Timestamp = DateTime.Now,
-                    Make = partsDBContext.Makes.Include(p => p.Models).ThenInclude(p => p.SubModels).ThenInclude(p => p.Engines).ElementAtOrDefault(1),
-                    Model = partsDBContext.Makes.Include(p => p.Models).ThenInclude(p => p.SubModels).ThenInclude(p => p.Engines).ElementAtOrDefault(1)?.Models.ElementAtOrDefault(0),
-                    SubModel = partsDBContext.Makes.Include(p => p.Models).ThenInclude(p => p.SubModels).ThenInclude(p => p.Engines).ElementAtOrDefault(1)?.Models.ElementAtOrDefault(0)?.SubModels.ElementAtOrDefault(0),
-                    Engine = partsDBContext.Makes.Include(p => p.Models).ThenInclude(p => p.SubModels).ThenInclude(p => p.Engines).ElementAtOrDefault(1)?.Models.ElementAtOrDefault(0)?.SubModels.ElementAtOrDefault(0)?.Engines.ElementAtOrDefault(0),
+                    Make = partsDBContext.Makes.Include(p => p.Models).ThenInclude(p => p.SubModels).ThenInclude(p => p.Engines).ElementAtOrDefault(2),
+                    Model = partsDBContext.Makes.Include(p => p.Models).ThenInclude(p => p.SubModels).ThenInclude(p => p.Engines).ElementAtOrDefault(2)?.Models.ElementAtOrDefault(0),
+                    SubModel = partsDBContext.Makes.Include(p => p.Models).ThenInclude(p => p.SubModels).ThenInclude(p => p.Engines).ElementAtOrDefault(2)?.Models.ElementAtOrDefault(0)?.SubModels.ElementAtOrDefault(0),
+                    Engine = partsDBContext.Makes.Include(p => p.Models).ThenInclude(p => p.SubModels).ThenInclude(p => p.Engines).ElementAtOrDefault(2)?.Models.ElementAtOrDefault(0)?.SubModels.ElementAtOrDefault(0)?.Engines.ElementAtOrDefault(0),
                 };
 
 

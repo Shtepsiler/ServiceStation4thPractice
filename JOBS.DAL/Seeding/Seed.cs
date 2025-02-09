@@ -3,6 +3,8 @@ using JOBS.DAL.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using ServiceCenterPayment;
+using ServiceCenterPayment.ContractDefinition;
 
 namespace JOBS.DAL.Seeding
 {
@@ -34,6 +36,7 @@ namespace JOBS.DAL.Seeding
         {
             var context = serviceProvider.GetRequiredService<ServiceStationDBContext>();
             var loger = serviceProvider.GetRequiredService<ILogger<Seed>>();
+            var factory = serviceProvider.GetRequiredService<IServiceCenterPaymentServiceFactory>();
 
             void addSetc(string spec)
             {
@@ -132,7 +135,7 @@ namespace JOBS.DAL.Seeding
             }
             // Додаємо більше робіт
             var jobs = new List<Job>
-    {
+        {
         new Job
         {
             Id = JobId1,
@@ -204,13 +207,30 @@ namespace JOBS.DAL.Seeding
             ClientId = Guid.Parse("A8688413-F6F9-41A2-8CE6-08DCFEFD3F67"),
             Description = "Test issue 6",
             ModelConfidence = 0.9f,
-            ModelAproved = false
+            ModelAproved = false,
+            
         }
     };
 
             // Додаємо роботи в контекст
             context.Jobs.AddRange(jobs);
             await context.SaveChangesAsync();
+
+            var serv = await factory.CreateServiceAsync();
+            foreach (var job in context.Jobs)
+            {
+                await serv.AddJobRequestAndWaitForReceiptAsync(new AddJobFunction()
+                {
+                    JobId = job.Id.ToString(),
+                    Price = await EthereumPriceConverter.ConvertUsdToEtherAsync(0, 10),
+                    UserId = job.ClientId.ToString()
+                });
+            }
+
+
+
+
+
 
             // Створення списку завдань для кожної роботи
             var tasks = new List<MechanicsTasks>
@@ -222,6 +242,7 @@ namespace JOBS.DAL.Seeding
             Name = "Task 1 for Job 1",
             IssueDate = DateTime.Now,
             Task = "Task description 1",
+            Price = 123,
             Status = Status.New,
             Mechanic = context.Mechanics.Include(p=>p.Specialisation).Where(p=>p.MechanicId == Guid.Parse("dc238098-d410-44f3-778e-08dc7b9965a6")).First()
         },
@@ -231,7 +252,7 @@ namespace JOBS.DAL.Seeding
             JobId = JobId1,
             Name = "Task 2 for Job 1",
             IssueDate = DateTime.Now,
-            Task = "Task description 2",
+            Task = "Task description 2",            Price = 123,
             Status = Status.New,
             Mechanic = context.Mechanics.Include(p=>p.Specialisation).Where(p=>p.MechanicId == Guid.Parse("dc238098-d410-44f3-778e-08dc7b996512")).First()
         },
@@ -241,7 +262,7 @@ namespace JOBS.DAL.Seeding
             JobId = JobId1,
             Name = "Task 3 for Job 1",
             IssueDate = DateTime.Now,
-            Task = "Task description 3",
+            Task = "Task description 3",            Price = 123,
             Status = Status.New,
             Mechanic =context.Mechanics.Include(p=>p.Specialisation).Where(p=>p.MechanicId == Guid.Parse("dc238098-d410-44f3-778e-08dc7b996514")).First()
         },
@@ -251,7 +272,7 @@ namespace JOBS.DAL.Seeding
             JobId = JobId2,
             Name = "Task 1 for Job 2",
             IssueDate = DateTime.Now,
-            Task = "Task description 1",
+            Task = "Task description 1",            Price = 123,
             Status = Status.New,
             Mechanic = context.Mechanics.Include(p=>p.Specialisation).Where(p=>p.MechanicId == Guid.Parse("dc238098-d410-44f3-778e-08dc7b996515")).First()
         },
@@ -261,7 +282,7 @@ namespace JOBS.DAL.Seeding
             JobId = JobId2,
             Name = "Task 2 for Job 2",
             IssueDate = DateTime.Now,
-            Task = "Task description 2",
+            Task = "Task description 2",            Price = 123,
             Status = Status.New,
             Mechanic = context.Mechanics.Include(p=>p.Specialisation).Where(p=>p.MechanicId == Guid.Parse("dc238098-d410-44f3-778e-08dc7b996511")).First()
         },
@@ -271,7 +292,7 @@ namespace JOBS.DAL.Seeding
             JobId = JobId2,
             Name = "Task 3 for Job 2",
             IssueDate = DateTime.Now,
-            Task = "Task description 3",
+            Task = "Task description 3",            Price = 123,
             Status = Status.New,
             Mechanic = context.Mechanics.Include(p=>p.Specialisation).Where(p=>p.MechanicId == Guid.Parse("dc238098-d410-44f3-778e-08dc7b996510")).First()
         },
@@ -280,7 +301,7 @@ namespace JOBS.DAL.Seeding
             Id = TaskId1Job3,
             JobId = JobId3,
             Name = "Task 1 for Job 3",
-            IssueDate = DateTime.Now,
+            IssueDate = DateTime.Now,            Price = 123,
             Task = "Task description 1",
             Status = Status.New,
             Mechanic = context.Mechanics.Include(p=>p.Specialisation).Where(p=>p.MechanicId == Guid.Parse("dc238098-d410-44f3-778e-08dc7b9965a8")).First()
@@ -290,7 +311,7 @@ namespace JOBS.DAL.Seeding
             Id = TaskId2Job3,
             JobId = JobId3,
             Name = "Task 2 for Job 3",
-            IssueDate = DateTime.Now,
+            IssueDate = DateTime.Now,            Price = 123,
             Task = "Task description 2",
             Status = Status.New,
             Mechanic =context.Mechanics.Include(p=>p.Specialisation).Where(p=>p.MechanicId == Guid.Parse("dc238098-d410-44f3-778e-08dc7b9965a5")).First()
@@ -301,7 +322,7 @@ namespace JOBS.DAL.Seeding
             JobId = JobId3,
             Name = "Task 3 for Job 3",
             IssueDate = DateTime.Now,
-            Task = "Task description 3",
+            Task = "Task description 3",            Price = 123,
             Status = Status.New,
             Mechanic = context.Mechanics.Include(p=>p.Specialisation).Where(p=>p.MechanicId == Guid.Parse("dc238098-d410-44f3-778e-08dc7b9965a1")).First()
         },
@@ -310,7 +331,7 @@ namespace JOBS.DAL.Seeding
             Id = Guid.NewGuid(),
             JobId = JobId1,
             Name = "Task 1 for Job 4",
-            IssueDate = DateTime.Now,
+            IssueDate = DateTime.Now,            Price = 123,
             Task = "Task description 4",
             Status = Status.New,
             Mechanic = context.Mechanics.Include(p=>p.Specialisation).Where(p=>p.MechanicId == Guid.Parse("dc238098-d410-44f3-778e-08dc7b9965a7")).First()
@@ -320,7 +341,7 @@ namespace JOBS.DAL.Seeding
             Id = Guid.NewGuid(),
             JobId = JobId2,
             Name = "Task 1 for Job 5",
-            IssueDate = DateTime.Now,
+            IssueDate = DateTime.Now,            Price = 123,
             Task = "Task description 5",
             Status = Status.New,
             Mechanic = context.Mechanics.Include(p=>p.Specialisation).Where(p=>p.MechanicId == Guid.Parse("dc238098-d410-44f3-778e-08dc7b9965a1")).First()

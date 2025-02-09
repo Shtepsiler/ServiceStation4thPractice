@@ -1,3 +1,4 @@
+using PARTS.DAL.Data;
 using System.Linq.Expressions;
 
 namespace PARTS.DAL.Interfaces
@@ -14,5 +15,7 @@ namespace PARTS.DAL.Interfaces
 
         Task DeleteAsync(Guid id);
         Task<IEnumerable<TEntity>> GetAsync(Expression<Func<TEntity, bool>> predicate = null);
+        Task<int> SaveChangesAsync();
+        PartsDBContext GetContext();
     }
 }

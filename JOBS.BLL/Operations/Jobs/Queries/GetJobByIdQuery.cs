@@ -5,6 +5,7 @@ using JOBS.DAL.Entities;
 using JOBS.DAL.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using ServiceCenterPayment;
 
 namespace JOBS.BLL.Operations.Jobs.Queries
 {
@@ -38,10 +39,13 @@ namespace JOBS.BLL.Operations.Jobs.Queries
                 // Перевіряємо, чи знайдений запис
                 if (job == null)
                     throw new NotFoundException($"Job with ID {request.Id} not found");
-
+                job.Price = job.Tasks.Sum(j => j.Price);
+                job.WEIPrice = (await EthereumPriceConverter.ConvertUsdToEtherAsync(job.Price.Value, 18)).ToString();
+                await _context.SaveChangesAsync();
                 // Мапимо знайдену сутність на DTO
                 var dto = mapper.Map<JobWithTasksDTO>(job);
                 dto.Specialisation = job.Mechanic?.Specialisation?.Name;
+
 
                 return dto;
             }

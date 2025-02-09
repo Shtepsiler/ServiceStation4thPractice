@@ -1,4 +1,6 @@
-﻿namespace PARTS.BLL.DTOs.Requests
+﻿using Newtonsoft.Json;
+
+namespace PARTS.BLL.DTOs.Requests
 {
     public class PartRequest : BaseDTO
     {
@@ -14,8 +16,13 @@
         public string? FitNotes { get; set; }
         public int? Count { get; set; }
         public Guid? CategoryId { get; set; }
+        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
 
         public BrandRequest? Brand { get; set; }
+        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+
         public CategoryRequest? Category { get; set; }
 
     }

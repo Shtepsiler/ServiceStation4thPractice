@@ -59,7 +59,9 @@ namespace JOBS.DAL.Migrations
                     IsPaid = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     TransactionHash = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     ModelConfidence = table.Column<float>(type: "real", nullable: true),
-                    ModelAproved = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
+                    ModelAproved = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    jobIndex = table.Column<int>(type: "int", nullable: true),
+                    WEIPrice = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -82,8 +84,9 @@ namespace JOBS.DAL.Migrations
                     Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     IssueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     FinishDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Task = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false)
+                    Task = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: true)
                 },
                 constraints: table =>
                 {

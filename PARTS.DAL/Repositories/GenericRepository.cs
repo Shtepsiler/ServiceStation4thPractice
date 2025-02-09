@@ -9,9 +9,8 @@ namespace PARTS.DAL.Repositories
 {
     public abstract class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : class
     {
-        protected readonly PartsDBContext databaseContext;
-        protected readonly DbSet<TEntity> table;
-
+        public readonly PartsDBContext databaseContext;
+        public readonly DbSet<TEntity> table;
         public GenericRepository(PartsDBContext databaseContext)
         {
             this.databaseContext = databaseContext;
@@ -28,7 +27,7 @@ namespace PARTS.DAL.Repositories
             }
             return entities;
         }
-        public async Task<IEnumerable<TEntity>> GetAsync(Expression<Func<TEntity, bool>> predicate = null)
+        public virtual async Task<IEnumerable<TEntity>> GetAsync(Expression<Func<TEntity, bool>> predicate = null)
         {
             var query = IncludeNavigationProperties(table);
             if (predicate != null)
@@ -40,8 +39,9 @@ namespace PARTS.DAL.Repositories
 
         public virtual async Task<TEntity?> GetByIdAsync(Guid id)
         {
-            var query = IncludeNavigationProperties(table);
+            var query = IncludeNavigationProperties(table).AsNoTracking();
             var entity = await query.FirstOrDefaultAsync(e => EF.Property<Guid>(e, "Id") == id);
+            
             if (entity == null)
             {
                 throw new EntityNotFoundException(GetEntityNotFoundErrorMessage(id));
@@ -87,6 +87,11 @@ namespace PARTS.DAL.Repositories
 
             return query;
         }
+        public async Task<int> SaveChangesAsync()
+        {
+            return await databaseContext.SaveChangesAsync();
+        }
+        public PartsDBContext GetContext() => databaseContext;
 
 
         protected static string GetEntityNotFoundErrorMessage(Guid id) =>

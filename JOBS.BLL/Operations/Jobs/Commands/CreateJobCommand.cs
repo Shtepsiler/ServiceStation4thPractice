@@ -6,6 +6,8 @@ using JOBS.DAL.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using ServiceCenterPayment;
+using ServiceCenterPayment.ContractDefinition;
+using System.Numerics;
 
 namespace JOBS.BLL.Operations.Jobs.Commands;
 
@@ -22,26 +24,19 @@ public class CreateJobHandler : IRequestHandler<CreateJobCommand, Guid>
 {
     private readonly ServiceStationDBContext _context;
     public IHttpClientFactory HttpClientFactory { get; }
-    public IServiceCenterPaymentServiceFactory Fack { get; }
+    public IServiceCenterPaymentServiceFactory Factory { get; }
 
-    public CreateJobHandler(ServiceStationDBContext context,IHttpClientFactory httpClientFactory, IServiceCenterPaymentServiceFactory fack)
+    public CreateJobHandler(ServiceStationDBContext context,IHttpClientFactory httpClientFactory, IServiceCenterPaymentServiceFactory factory)
     {
         _context = context;
         HttpClientFactory = httpClientFactory;
-        Fack = fack;
+        Factory = factory;
     }
 
 
     public async Task<Guid> Handle(CreateJobCommand request, CancellationToken cancellationToken)
     {
-        try
-        {
-            var ser = Fack.CreateServiceAsync();
-        }
-        catch(Exception e)
-        {
-            throw e;
-        }
+
         var entity = new Job()
         {
             /* ManagerId = request.ManagerId,*/
@@ -77,10 +72,21 @@ public class CreateJobHandler : IRequestHandler<CreateJobCommand, Guid>
         entity.Status = Status.New;
         entity.ModelConfidence = modelPredictResoponce.confidence;
         entity.ModelAproved = modelPredictResoponce.confidence > 0.7;
+        entity.Price = entity.Tasks?.Sum(t => t.Price ?? 0) ?? 0;
+        entity.WEIPrice = (await EthereumPriceConverter.ConvertUsdToEtherAsync(entity.Price.Value, 18)).ToString();
+   
         await _context.Jobs.AddAsync(entity);
-
-
         await _context.SaveChangesAsync(cancellationToken);
+        
+        var serv = await Factory.CreateServiceAsync();
+
+        await serv.AddJobRequestAndWaitForReceiptAsync(new AddJobFunction()
+        {
+            JobId = entity.Id.ToString(),
+            Price = BigInteger.Parse(entity.WEIPrice),
+            UserId = entity.ClientId.ToString()
+        });
+
 
         return entity.Id;
     }

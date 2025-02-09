@@ -22,39 +22,78 @@ namespace ServiceCenterPayment
 
         public async Task<ServiceCenterPaymentService> CreateServiceAsync()
         {
-            if (string.IsNullOrEmpty(_settings.CurrentValue.ContractAddress))
-            {
-                return await DeployContractAndGetServiceAsync();
-            }
-            Console.WriteLine(_settings.CurrentValue.ContractAddress);
+            var contractAddress = _settings.CurrentValue.ContractAddress;
 
-            return new ServiceCenterPaymentService(_web3, _settings.CurrentValue.ContractAddress);
+            if (!string.IsNullOrEmpty(contractAddress))
+            {
+                bool isContractDeployed = await IsContractDeployedAsync(contractAddress);
+                if (isContractDeployed)
+                {
+                    Console.WriteLine($"Contract already deployed at: {contractAddress}");
+                    return new ServiceCenterPaymentService(_web3, contractAddress);
+                }
+            }
+
+            return await DeployContractAndGetServiceAsync();
+        }
+
+        private async Task<bool> IsContractDeployedAsync(string contractAddress)
+        {
+            try
+            {
+                var code = await _web3.Eth.GetCode.SendRequestAsync(contractAddress);
+                return !string.IsNullOrEmpty(code) && code != "0x";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error checking contract deployment: {ex.Message}");
+                return false;
+            }
         }
 
         private async Task<ServiceCenterPaymentService> DeployContractAndGetServiceAsync()
         {
-            var service = await ServiceCenterPaymentService.DeployContractAndGetServiceAsync(_web3, new ServiceCenterPaymentDeployment());
-            var contractAddress = service.ContractAddress;
+            try
+            {
+                var service = await ServiceCenterPaymentService.DeployContractAndGetServiceAsync(_web3, new ServiceCenterPaymentDeployment());
+                var contractAddress = service.ContractAddress;
 
-            _settings.CurrentValue.ContractAddress = contractAddress;
-            Console.WriteLine(contractAddress);
+                Console.WriteLine($"New contract deployed at: {contractAddress}");
 
-            SaveContractAddress(contractAddress);
+                SaveContractAddress(contractAddress);
 
-            return service;
+                return service;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Deployment failed: {ex.Message}");
+                throw;
+            }
         }
 
         private void SaveContractAddress(string contractAddress)
         {
-
-
             var configPath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json");
-            var json = File.ReadAllText(configPath);
-            dynamic jsonObj = Newtonsoft.Json.JsonConvert.DeserializeObject(json);
-            jsonObj["Blockchain"]["ContractAddress"] = contractAddress;
+            if (!File.Exists(configPath))
+            {
+                Console.WriteLine("appsettings.json not found.");
+                return;
+            }
 
-            var updatedJson = Newtonsoft.Json.JsonConvert.SerializeObject(jsonObj, Newtonsoft.Json.Formatting.Indented);
-            File.WriteAllText(configPath, updatedJson);
+            try
+            {
+                var json = File.ReadAllText(configPath);
+                dynamic jsonObj = Newtonsoft.Json.JsonConvert.DeserializeObject(json);
+                jsonObj["Blockchain"]["ContractAddress"] = contractAddress;
+
+                var updatedJson = Newtonsoft.Json.JsonConvert.SerializeObject(jsonObj, Newtonsoft.Json.Formatting.Indented);
+                File.WriteAllText(configPath, updatedJson);
+                Console.WriteLine("Contract address saved.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving contract address: {ex.Message}");
+            }
         }
     }
 }

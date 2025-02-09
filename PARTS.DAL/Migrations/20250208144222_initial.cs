@@ -62,9 +62,11 @@ namespace PARTS.DAL.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     СustomerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    IsPaid = table.Column<bool>(type: "bit", nullable: false),
-                    TransactionHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsPaid = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    TransactionHash = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false),
+                    OrderIndex = table.Column<int>(type: "int", nullable: true),
+                    WEIPrice = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -254,7 +256,7 @@ namespace PARTS.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "OrderPart",
+                name: "OrderParts",
                 columns: table => new
                 {
                     OrdersId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -262,15 +264,15 @@ namespace PARTS.DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OrderPart", x => new { x.OrdersId, x.PartsId });
+                    table.PrimaryKey("PK_OrderParts", x => new { x.OrdersId, x.PartsId });
                     table.ForeignKey(
-                        name: "FK_OrderPart_Orders_OrdersId",
+                        name: "FK_OrderParts_Orders_OrdersId",
                         column: x => x.OrdersId,
                         principalTable: "Orders",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_OrderPart_Parts_PartsId",
+                        name: "FK_OrderParts_Parts_PartsId",
                         column: x => x.PartsId,
                         principalTable: "Parts",
                         principalColumn: "Id",
@@ -323,8 +325,8 @@ namespace PARTS.DAL.Migrations
                 column: "MakeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderPart_PartsId",
-                table: "OrderPart",
+                name: "IX_OrderParts_PartsId",
+                table: "OrderParts",
                 column: "PartsId");
 
             migrationBuilder.CreateIndex(
@@ -382,7 +384,7 @@ namespace PARTS.DAL.Migrations
                 name: "CategoryImages");
 
             migrationBuilder.DropTable(
-                name: "OrderPart");
+                name: "OrderParts");
 
             migrationBuilder.DropTable(
                 name: "PartImages");

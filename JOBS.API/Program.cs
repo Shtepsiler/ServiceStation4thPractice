@@ -142,6 +142,9 @@ var app = builder.Build();
 using (var scope = app.Services.CreateAsyncScope())
 {
     await Seed.Initialize(scope.ServiceProvider);
+
+    IServiceCenterPaymentServiceFactory payment = scope.ServiceProvider.GetRequiredService<IServiceCenterPaymentServiceFactory>();
+    await payment.CreateServiceAsync();
 }
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

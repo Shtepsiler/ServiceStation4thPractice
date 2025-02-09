@@ -48,7 +48,6 @@ namespace JOBS.BLL.Operations.Jobs.Commands
             entity.IssueDate = request.IssueDate;
             entity.FinishDate = request.FinishDate;
             entity.Description = request.Description;
-            entity.Price = request.Price;
 
             await _context.SaveChangesAsync(cancellationToken);
         }

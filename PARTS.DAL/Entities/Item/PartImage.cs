@@ -1,4 +1,6 @@
-﻿namespace PARTS.DAL.Entities.Item
+﻿using System.Text.Json.Serialization;
+
+namespace PARTS.DAL.Entities.Item
 {
     public class PartImage : Base
     {
@@ -8,6 +10,6 @@
         public string? Path { get; set; }
         public string? Title { get; set; }
         public Guid? PartId { get; set; }
-        public Part? Part { get; set; }
+        [JsonIgnore] public Part? Part { get; set; }
     }
 }
