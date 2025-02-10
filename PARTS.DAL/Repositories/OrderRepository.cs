@@ -45,23 +45,20 @@ namespace PARTS.DAL.Repositories
         {
             try
             {
-                var order = await databaseContext.Orders.FindAsync(orderId);
+                var order = databaseContext.Orders.Include(p => p.Parts).ToList().FirstOrDefault(p => p.Id == orderId);
                 if (order == null) throw new EntityNotFoundException($"order {orderId} not found");
 
                 var part = await databaseContext.Parts.FindAsync(partId);
                 if (part == null) throw new EntityNotFoundException($"part {partId} not found");
 
                 order.Parts.Add(part);
-                order.WEIPrice = (await EthereumPriceConverter.ConvertUsdToEtherAsync(order.TotalPrice, 18)).ToString();
-
+                var price = order.Parts.Sum(p => p.PriceRegular) ?? 0;
+                var weiprice = await EthereumPriceConverter.ConvertUsdToEtherAsync(price, 18);
+                order.WEIPrice = weiprice.ToString();
                 await databaseContext.SaveChangesAsync();
-      
-
-
             }
             catch (Exception e)
             {
-                
                 throw e; 
             }
         }
@@ -70,21 +67,21 @@ namespace PARTS.DAL.Repositories
         public async Task RemovePartFromOrderAsync(Guid orderId, Guid partId)
         {
             try{
-            var order =  databaseContext.Orders.Include(p=>p.Parts).ToList().FirstOrDefault(p=>p.Id == orderId);
-            if (order == null) throw new EntityNotFoundException($"order {orderId} not found");
+                var order =  databaseContext.Orders.Include(p=>p.Parts).ToList().FirstOrDefault(p=>p.Id == orderId);
+                if (order == null) throw new EntityNotFoundException($"order {orderId} not found");
 
-            var part = await databaseContext.Parts.FindAsync(partId);
-            if (part == null) throw new EntityNotFoundException($"part {partId} not found");
+                var part = await databaseContext.Parts.FindAsync(partId);
+                if (part == null) throw new EntityNotFoundException($"part {partId} not found");
 
-            order.Parts.Remove(part);
-                order.WEIPrice = (await EthereumPriceConverter.ConvertUsdToEtherAsync(order.TotalPrice, 18)).ToString();
+                order.Parts.Remove(part);
+                var price = order.Parts.Sum(p => p.PriceRegular) ?? 0;
+                var weiprice = await EthereumPriceConverter.ConvertUsdToEtherAsync(price, 18); 
+                order.WEIPrice = weiprice.ToString(); 
                 await databaseContext.SaveChangesAsync();
-
             }
             catch (Exception e)
             {
-                
-                throw; 
+                throw e; 
             }
         }
     }
