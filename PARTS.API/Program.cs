@@ -144,8 +144,8 @@ public class Program
             var dbcontext = scope.ServiceProvider.GetRequiredService<PartsDBContext>();
 
             ModelSplitter modelSplitter = new(dbcontext);
-            //if (!modelSplitter.isDataPresent())
-            //   modelSplitter.Seed();
+            if (!modelSplitter.isDataPresent())
+                modelSplitter.Seed();
             modelSplitter.seedVehicles();
 
             ShopSeeder shopSeeder = new ShopSeeder(dbcontext);

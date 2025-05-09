@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿          using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
 using Microsoft.Extensions.Caching.Distributed;
@@ -21,8 +21,7 @@ namespace ClientPartAPI.Controllers
         private readonly IVehicleService vehicleService;
         public VehicleController(
             ILogger<VehicleController> logger,
-             IDistributedCache distributedCache
-,
+             IDistributedCache distributedCache,
              IVehicleService VehicleService
              )
         {
@@ -111,7 +110,7 @@ namespace ClientPartAPI.Controllers
         }
 
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-
+         
         //  [Authorize]
         [HttpPost]
         public async Task<ActionResult<VehicleResponse>> PostAsync([FromBody] VehicleRequest req)
@@ -201,7 +200,7 @@ namespace ClientPartAPI.Controllers
                     return BadRequest("Обєкт Vehicle є null");
                 }
                 if (!ModelState.IsValid)
-                {
+                { 
                     _logger.LogInformation($"Ми отримали некоректний json зі сторони клієнта");
                     return BadRequest("Обєкт Vehicle є некоректним");
                 }

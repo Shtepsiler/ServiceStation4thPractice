@@ -147,7 +147,7 @@ services:
 
   bloc.chain:
     container_name: blocchain
-    image: ${DOCKER_REGISTRY-}bchnet
+    image: ${DOCKER_REGISTRY-}bchnet:latest
     networks:
       - ServiceStationPartsNetwork
     ports:
