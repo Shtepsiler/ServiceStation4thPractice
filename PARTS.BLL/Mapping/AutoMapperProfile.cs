@@ -110,6 +110,9 @@ namespace PARTS.BLL.Mapping
             CreateMap<Order, OrderRequest>().ReverseMap();
             CreateMap<Order, OrderResponse>().ReverseMap();
             CreateMap<OrderRequest, OrderResponse>().ReverseMap();
+            CreateMap<OrderPart, OrderPartResponse>()
+                .ForMember(p => p.Order, m => m.MapFrom(e => e.Order))
+                .ForMember(p => p.Part, m => m.MapFrom(e => e.Part)).ReverseMap();
 
 
         }

@@ -14,7 +14,7 @@ namespace JOBS.BLL.DTOs.Respponces
         public DateTime? FinishDate { get; set; }
         public string? Task { get; set; }
         public string? Status { get; set; }
-
+        public decimal? Price { get; set; }
         public void Mapping(Profile profile)
         {
             profile.CreateMap<MechanicsTasksDTO, MechanicsTasks>().ReverseMap();

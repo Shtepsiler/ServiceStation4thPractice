@@ -65,7 +65,7 @@ namespace IDENTITY.BLL.Services
             {
                 logger.Log(LogLevel.Information, $"                                                                        User id {request.Id} not confirm email");
 
-                throw new EmailNotConfirmedException("Email is not confirmed");
+                throw new EmailNotConfirmedException(rez.Errors.AsQueryable().FirstOrDefault().Description);
             }
 
         }
@@ -92,7 +92,15 @@ namespace IDENTITY.BLL.Services
             logger.Log(LogLevel.Information, $"                                                                        User {request.Email} is Sign in successfully");
 
             var jwtToken = tokenService.BuildToken(user);
-            return new() { Id = user.Id, Token = tokenService.SerializeToken(jwtToken), UserName = user.UserName, IsEmailConfirmed = user.EmailConfirmed, RequiresTwoFactor = user.TwoFactorEnabled };
+            return new() { Id = user.Id, 
+                Token = tokenService.SerializeToken(jwtToken),
+                UserName = user.UserName,
+                IsEmailConfirmed = user.EmailConfirmed, 
+                RequiresTwoFactor = user.TwoFactorEnabled,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber
+            
+            };
         }
 
         public async Task SendEmailConfirmation(Guid userid,string refererUrl)
@@ -102,7 +110,7 @@ namespace IDENTITY.BLL.Services
             var callbackUrl = $"{refererUrl}{client.EmailConfirmationPath}?Id={userid}&Code={System.Net.WebUtility.UrlEncode(code)}";
 
             await emailSender.SendEmailAsync(user.Email, "Confirm your email", $"{client.ResetPasswordMessage} {callbackUrl}");
-            throw new EmailNotConfirmedException("email not confirmed");
+         //   throw new EmailNotConfirmedException("email not confirmed");
         }
 
 
@@ -142,7 +150,17 @@ namespace IDENTITY.BLL.Services
             {
                 //  var newUser = await userManager.FindByNameAsync(request.UserName);
                 var jwtToken = tokenService.BuildToken(user);
-                return new() { Id = newUser.Id, UserName = newUser.UserName, Token = tokenService.SerializeToken(jwtToken), IsEmailConfirmed = user.EmailConfirmed, RequiresTwoFactor = user.TwoFactorEnabled };
+                return new()
+                {
+                    Id = user.Id,
+                    Token = tokenService.SerializeToken(jwtToken),
+                    UserName = user.UserName,
+                    IsEmailConfirmed = user.EmailConfirmed,
+                    RequiresTwoFactor = user.TwoFactorEnabled,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber
+
+                };
             }
             catch (Exception ex) { throw ex; }
         }

@@ -23,7 +23,8 @@ namespace PARTS.DAL.Entities.Item
         [JsonIgnore] public Brand? Brand { get; set; }
         [JsonIgnore] public Category? Category { get; set; }
         [JsonIgnore] public PartImage? PartImage { get; set; }
-        [JsonIgnore] public List<Order> Orders { get; set; } = new List<Order>();
+        [JsonIgnore] public List<OrderPart> OrderParts { get; set; } = new();
+
 
     }
 }

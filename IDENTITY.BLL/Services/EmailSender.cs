@@ -1,5 +1,6 @@
 ﻿using IDENTITY.BLL.Configurations;
 using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Logging;
 using MimeKit;
@@ -31,13 +32,27 @@ namespace IDENTITY.BLL.Services
 
             message.Body = bodyBuilder.ToMessageBody();
 
-            using (var client = new SmtpClient())
+            try
             {
-                client.Connect(Configuration.Host, Configuration.Port, Configuration.UseSsl);
-                client.Authenticate(Configuration.Adress, Configuration.Password);
+                using (var client = new SmtpClient())
+                {
+                    await client.ConnectAsync(Configuration.Host, Configuration.Port, Configuration.UseSsl);
+                    await client.AuthenticateAsync(Configuration.Adress, Configuration.Password);
+                    await client.SendAsync(message);
+                    await client.DisconnectAsync(true);
+                }
 
-                await client.SendAsync(message);
-                client.Disconnect(true);
+                Logger.LogInformation($"Email sent to {recipientEmail}: {subject}");
+            }
+            catch (AuthenticationException ex)
+            {
+                Logger.LogError($"Authentication failed when sending email: {ex.Message}");
+                throw; // або кинути кастомну помилку
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Unexpected error during email sending: {ex.Message}");
+                throw;
             }
 
             StringBuilder stringBuilder = new StringBuilder();

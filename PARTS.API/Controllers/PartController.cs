@@ -9,12 +9,14 @@ using PARTS.DAL.Interfaces;
 using PARTS.BLL.Services.Interaces;
 using PARTS.BLL.DTOs.Requests;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 
 namespace ClientPartAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Mechanic,User")]
     public class PartController : ControllerBase
     { 
         private readonly ILogger<PartController> _logger;

@@ -8,12 +8,14 @@ using Newtonsoft.Json;
 using PARTS.DAL.Interfaces;
 using PARTS.BLL.Services.Interaces;
 using PARTS.BLL.DTOs.Requests;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 
 namespace ClientPartAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Mechanic,User")]
     public class VehicleController : ControllerBase
     { 
         private readonly ILogger<VehicleController> _logger;
@@ -189,6 +191,7 @@ namespace ClientPartAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+
         [HttpPost("new")]
         public async Task<ActionResult<VehicleResponse>> PostVehicleAsync([FromBody] CreateVehicleRequest vehicleRequest)
         {

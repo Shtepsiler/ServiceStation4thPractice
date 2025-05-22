@@ -50,15 +50,21 @@ public class CreateMechanicTaskCommandHandler : IRequestHandler<CreateMechanicTa
         job.Price = job.Tasks?.Sum(t => t.Price ?? 0) ?? 0;
         job.WEIPrice = (await EthereumPriceConverter.ConvertUsdToEtherAsync(job.Price.Value, 18)).ToString();
         await _context.SaveChangesAsync(cancellationToken);
-
-        var serv = await Factory.CreateServiceAsync();
-        await serv.UpdateJobRequestAndWaitForReceiptAsync(new UpdateJobFunction()
+        try
         {
-            JobIndex = (BigInteger)job.jobIndex.Value,
-            JobId = job.Id.ToString(),
-            Price = BigInteger.Parse(job.WEIPrice),
-            UserId = job.ClientId.Value.ToString()
-        });
+            var serv = await Factory.CreateServiceAsync();
+            await serv.UpdateJobRequestAndWaitForReceiptAsync(new UpdateJobFunction()
+            {
+                JobIndex = (BigInteger)job.jobIndex.Value,
+                JobId = job.Id.ToString(),
+                Price = BigInteger.Parse(job.WEIPrice),
+                UserId = job.ClientId.Value.ToString()
+            });
+        }
+        catch(Exception e)
+        {
+            
+        }
 
         return entity.Id;
     }

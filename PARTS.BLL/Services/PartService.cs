@@ -20,7 +20,7 @@ namespace PARTS.BLL.Services
             try
             {
                 // Fetch parts related to the specified OrderId directly from the repository
-                var entities = await _repository.GetAsync(p => p.Orders.Any(o => o.Id == orderId));
+                var entities = await _repository.GetAsync(p => p.OrderParts.Any(o => o.OrderId == orderId));
 
                 // Map the result to PartResponse
                 return _mapper.Map<IEnumerable<Part>, IEnumerable<PartResponse>>(entities);

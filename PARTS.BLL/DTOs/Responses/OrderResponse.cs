@@ -10,6 +10,6 @@ namespace PARTS.BLL.DTOs.Responses
         public string? WEIPrice { get; set; }
         public bool IsPaid { get; set; }
         public Status Status { get; set; }
-        public IEnumerable<PartResponse>? Parts { get; set; }
+        public IEnumerable<OrderPartResponse>? Parts { get; set; }
     }
 }

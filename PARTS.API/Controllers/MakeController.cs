@@ -10,12 +10,14 @@ using PARTS.BLL.Services.Interaces;
 using PARTS.BLL.DTOs.Requests;
 using ClientPartAPI.Helpers;
 using PARTS.BLL.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 
 namespace ClientPartAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Mechanic,User")]
     public class MakeController : ControllerBase
     { 
         private readonly ILogger<MakeController> _logger;

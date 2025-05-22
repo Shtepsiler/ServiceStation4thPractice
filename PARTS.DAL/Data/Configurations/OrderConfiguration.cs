@@ -16,14 +16,13 @@ namespace PARTS.DAL.Data.Configurations
             builder.Property(p => p.IsPaid).HasDefaultValue(false);
             builder.Property(p => p.TransactionHash).HasMaxLength(256);
             builder.Property(p => p.Status)
-                   .HasConversion<int>() // Збереження Enum як int у БД
+                   .HasConversion<int>() 
                    .IsRequired();
             builder.Property(p=>p.OrderIndex).IsRequired(false);
             builder.Property(p=>p.WEIPrice).IsRequired(false);
 
-            builder.HasMany(p => p.Parts)
-                   .WithMany(p => p.Orders)
-                   .UsingEntity(j => j.ToTable("OrderParts"));
+            builder.HasMany(p => p.OrderParts)
+                   .WithOne(p => p.Order);
         }
     }
 }

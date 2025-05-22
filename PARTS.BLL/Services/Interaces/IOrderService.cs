@@ -6,7 +6,7 @@ namespace PARTS.BLL.Services.Interaces
 {
     public interface IOrderService : IGenericService<Order, OrderRequest, OrderResponse>
     {
-       Task AddPartToOrderAsync( Guid orderId, Guid partId);
+       Task AddPartToOrderAsync( Guid orderId, Guid partId, int quantity);
         Task RemovePartFromOrderAsync(Guid orderId, Guid partId);
     }
 }

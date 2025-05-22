@@ -3,6 +3,7 @@ using JOBS.BLL.DTOs.Respponces;
 using JOBS.BLL.Operations.Mechanics.Commands;
 using JOBS.BLL.Operations.Mechanics.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
@@ -12,6 +13,7 @@ namespace JOBS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class MecahicController : Controller
     {
         private IMediator Mediator;

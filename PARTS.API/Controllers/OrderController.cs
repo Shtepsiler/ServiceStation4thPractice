@@ -9,12 +9,14 @@ using PARTS.DAL.Interfaces;
 using PARTS.BLL.Services.Interaces;
 using PARTS.BLL.DTOs.Requests;
 using System.Reflection.Metadata.Ecma335;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 
 namespace ClientPartAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Mechanic,User")]
     public class OrderController : ControllerBase
     { 
         private readonly IOrderService orderService;
@@ -157,7 +159,7 @@ namespace ClientPartAPI.Controllers
             }
         }
         [HttpPost("AddPartToOrder")]
-        public async Task<ActionResult> AddPartToOrderAsync([FromQuery] Guid orderId, [FromQuery] Guid partId)
+        public async Task<ActionResult> AddPartToOrderAsync([FromQuery] Guid orderId, [FromQuery] Guid partId, [FromQuery] int? quantity = 1)
         {
             try
             {
@@ -167,7 +169,7 @@ namespace ClientPartAPI.Controllers
                     _logger.LogInformation($"Ми отримали некоректний json зі сторони клієнта");
                     return BadRequest("Обєкт Order є некоректним");
                 }
-                await orderService.AddPartToOrderAsync(orderId,  partId);
+                await orderService.AddPartToOrderAsync(orderId, partId, quantity == null ? 1: quantity.Value );
 
 
                 return StatusCode(StatusCodes.Status200OK);

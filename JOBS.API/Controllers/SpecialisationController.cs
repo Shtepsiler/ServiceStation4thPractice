@@ -13,6 +13,7 @@ namespace JOBS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class SpecialisationController : Controller
     {
         private IMediator Mediator;

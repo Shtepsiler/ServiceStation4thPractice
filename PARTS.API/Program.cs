@@ -97,31 +97,31 @@ public class Program
             options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         })
-            .AddCookie("Identity.Application", options =>
-            {
-                options.Cookie.Name = "Bearer";
-            })
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(builder.Configuration["JwtSecurityKey"])),
-                    ClockSkew = TimeSpan.FromDays(1),
-                };
-                options.Events = new JwtBearerEvents
-                {
-                    OnMessageReceived = context =>
-                    {
-                        context.Token = context.Request.Cookies["Bearer"];
-                        return Task.CompletedTask;
-                    }
-                };
-            });
+     .AddCookie("Identity.Application", options =>
+     {
+         options.Cookie.Name = "Bearer";
+     })
+     .AddJwtBearer(options =>
+     {
+         options.TokenValidationParameters = new TokenValidationParameters
+         {
+             ValidateIssuer = false,
+             ValidateAudience = false,
+             ValidateLifetime = true,
+             ValidateIssuerSigningKey = true,
+             IssuerSigningKey = new SymmetricSecurityKey(
+                 Encoding.UTF8.GetBytes(builder.Configuration["JwtSecurityKey"])),
+             ClockSkew = TimeSpan.FromDays(1),
+         };
+         options.Events = new JwtBearerEvents
+         {
+             OnMessageReceived = context =>
+             {
+                 context.Token = context.Request.Cookies["Bearer"];
+                 return Task.CompletedTask;
+             }
+         };
+     });
 
         builder.Services.AddAuthorization();
         builder.Services.AddPartsDal();

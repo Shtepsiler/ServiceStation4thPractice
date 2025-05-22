@@ -50,16 +50,24 @@ namespace IDENTITY.API.Controllers
             {
                 if (request == null)
                 {
-                    throw new ArgumentNullException(nameof(request), "Request cannot be null");
+                    logger.LogWarning("SignIn request is null.");
+                    return BadRequest("Request cannot be null.");
                 }
-                var refererUrl = HttpContext.Request.Headers["Referer"].ToString();
+                var refererUrl = HttpContext.Request.Headers.Referer.ToString();
                 if (string.IsNullOrEmpty(refererUrl))
                 {
-                    throw new ArgumentException("Referer URL cannot be null or empty");
+                    logger.LogWarning("Referer URL is missing.");
+                    //return BadRequest("Referer URL is required.");
+                    var baseUrl = $"http://localhost:2060";
+                    request.refererUrl = baseUrl;
                 }
-                var uri = new Uri(refererUrl);
-                var baseUrl = $"{uri.Scheme}://{uri.Host}:{uri.Port}";
-                request.refererUrl = baseUrl;
+                else 
+                {
+                    var uri = new Uri(refererUrl);
+                    var baseUrl = $"{uri.Scheme}://{uri.Host}:{uri.Port}";
+                    request.refererUrl = baseUrl;
+                }
+            
                 var validationResult = _SingUpValidator.Validate(request);
                 if (!validationResult.IsValid)
                 {
@@ -69,7 +77,7 @@ namespace IDENTITY.API.Controllers
                 var response = await _IdentityService.SignUpAsync(request);
                 HttpContext.Response.Cookies.Append("Bearer", response.Token, new CookieOptions
                 {
-                    Expires = DateTime.Now.AddDays(2),
+                    Expires = DateTime.Now.AddDays(1),
                     HttpOnly = true,
                     Secure = true,
                     IsEssential = true,
@@ -128,11 +136,14 @@ namespace IDENTITY.API.Controllers
                 if (string.IsNullOrEmpty(refererUrl))
                 {
                     logger.LogWarning("Referer URL is missing.");
-                    return BadRequest("Referer URL is required.");
+                    //return BadRequest("Referer URL is required.");
                 }
-                var uri = new Uri(refererUrl);
-                var baseUrl = $"{uri.Scheme}://{uri.Host}:{uri.Port}";
-                request.refererUrl = baseUrl;
+                else
+                {
+                    var uri = new Uri(refererUrl);
+                    var baseUrl = $"{uri.Scheme}://{uri.Host}:{uri.Port}";
+                    request.refererUrl = baseUrl;
+                }
                 var validationResult = _SingInValidator.Validate(request);
                 if (!validationResult.IsValid)
                 {
@@ -188,6 +199,7 @@ namespace IDENTITY.API.Controllers
             }
         }
 
+        [HttpGet("ConfirmEmail")]
         [HttpPost("ConfirmEmail")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -226,7 +238,7 @@ namespace IDENTITY.API.Controllers
                 var jwtToken = tokenService.BuildToken(user);
                 HttpContext.Response.Cookies.Append("Bearer", tokenService.SerializeToken(jwtToken), new()
                 {
-                    Expires = DateTime.Now.AddDays(2),
+                    Expires = DateTime.Now.AddDays(1),
                     HttpOnly = true,
                     Secure = true,
                     IsEssential = true,

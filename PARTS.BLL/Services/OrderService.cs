@@ -49,9 +49,9 @@ namespace PARTS.BLL.Services
             }
         }
 
-        public async Task AddPartToOrderAsync(Guid orderId, Guid partId)
+        public async Task AddPartToOrderAsync(Guid orderId, Guid partId, int quantity)
         {
-            await repository.AddPartToOrderAsync(orderId, partId);
+            await repository.AddPartToOrderAsync(orderId, partId, quantity);
 
             // Викликаємо подію після додавання частини
             if (OnPriceUpdated != null)

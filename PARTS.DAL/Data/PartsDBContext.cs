@@ -32,6 +32,7 @@ namespace PARTS.DAL.Data
         public DbSet<SubModel> SubModels { get; set; }
         public DbSet<Vehicle> Vehicles { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderPart> OrdersParts { get; set; }
 
 
 
@@ -53,7 +54,9 @@ namespace PARTS.DAL.Data
             modelBuilder.ApplyConfiguration(new PartImageConfiguration());
             modelBuilder.ApplyConfiguration(new SubModelConfiguration());
             modelBuilder.ApplyConfiguration(new VehicleConfiguration());
-            modelBuilder.ApplyConfiguration(new OrderConfiguration());
+            modelBuilder.ApplyConfiguration(new OrderConfiguration()); 
+            modelBuilder.ApplyConfiguration(new OrdersPartsConfiguration());
+
 
         }
 

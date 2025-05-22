@@ -8,24 +8,28 @@ using System.Threading.Tasks;
 
 namespace PARTS.DAL.Entities
 {
-    public class Order: Base
+    public class Order : Base
     {
         public Guid? СustomerId { get; set; }
         public bool IsPaid { get; set; } = false;
         public Status Status { get; set; } = Status.Pending;
         public int? OrderIndex { get; set; }
         public string WEIPrice { get; set; }
-        public decimal TotalPrice => CalculateTotalPrice();
-        public string? TransactionHash { get; set; } 
+        public string? TransactionHash { get; set; }
 
-        public List<Part> Parts { get; set; } = new List<Part>();
+        public List<OrderPart> OrderParts { get; set; } = new();
+
+        public decimal TotalPrice => CalculateTotalPrice();
+
         private decimal CalculateTotalPrice()
         {
             decimal total = 0;
-            foreach (var part in Parts)
+            foreach (var orderPart in OrderParts)
             {
-                if(part.PriceRegular != null)
-                total += part.PriceRegular.Value;
+                if (orderPart.Part.PriceRegular != null)
+                {
+                    total += orderPart.Part.PriceRegular.Value * orderPart.Quantity;
+                }
             }
             return total;
         }

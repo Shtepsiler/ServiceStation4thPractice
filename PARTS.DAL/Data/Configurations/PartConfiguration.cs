@@ -10,14 +10,15 @@ namespace PARTS.DAL.Data.Configurations
         {
             builder.HasKey(p => p.Id);
 
-            builder.HasOne(pi => pi.PartImage).WithOne(p => p.Part).HasForeignKey<PartImage>(ci => ci.PartId); // Ось цей рядок визначає зовнішній ключ;
+            builder.HasOne(pi => pi.PartImage).WithOne(p => p.Part).HasForeignKey<PartImage>(ci => ci.PartId); 
 
             builder.HasOne(p => p.Category)
                               .WithMany(c => c.Parts)
                               .HasForeignKey(p => p.CategoryId);
-        /*    PartSeeder brandSeeder = new PartSeeder();
-            brandSeeder.Seed(builder);
-*/
+
+            builder.HasMany(p => p.OrderParts)
+                   .WithOne(p => p.Part);
+
         }
     }
 }

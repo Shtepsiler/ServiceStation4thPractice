@@ -22,21 +22,6 @@ namespace PARTS.DAL.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("OrderPart", b =>
-                {
-                    b.Property<Guid>("OrdersId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("PartsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("OrdersId", "PartsId");
-
-                    b.HasIndex("PartsId");
-
-                    b.ToTable("OrderParts", (string)null);
-                });
-
             modelBuilder.Entity("PARTS.DAL.Entities.Item.Brand", b =>
                 {
                     b.Property<Guid>("Id")
@@ -253,6 +238,24 @@ namespace PARTS.DAL.Migrations
                     b.ToTable("Orders");
                 });
 
+            modelBuilder.Entity("PARTS.DAL.Entities.OrderPart", b =>
+                {
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PartId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("OrderId", "PartId");
+
+                    b.HasIndex("PartId");
+
+                    b.ToTable("OrdersParts");
+                });
+
             modelBuilder.Entity("PARTS.DAL.Entities.Vehicle.Engine", b =>
                 {
                     b.Property<Guid>("Id")
@@ -435,21 +438,6 @@ namespace PARTS.DAL.Migrations
                     b.ToTable("Vehicles");
                 });
 
-            modelBuilder.Entity("OrderPart", b =>
-                {
-                    b.HasOne("PARTS.DAL.Entities.Order", null)
-                        .WithMany()
-                        .HasForeignKey("OrdersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PARTS.DAL.Entities.Item.Part", null)
-                        .WithMany()
-                        .HasForeignKey("PartsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("PARTS.DAL.Entities.Item.CategoryImage", b =>
                 {
                     b.HasOne("PARTS.DAL.Entities.Item.Category", "Category")
@@ -483,6 +471,25 @@ namespace PARTS.DAL.Migrations
                     b.HasOne("PARTS.DAL.Entities.Item.Part", "Part")
                         .WithOne("PartImage")
                         .HasForeignKey("PARTS.DAL.Entities.Item.PartImage", "PartId");
+
+                    b.Navigation("Part");
+                });
+
+            modelBuilder.Entity("PARTS.DAL.Entities.OrderPart", b =>
+                {
+                    b.HasOne("PARTS.DAL.Entities.Order", "Order")
+                        .WithMany("OrderParts")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PARTS.DAL.Entities.Item.Part", "Part")
+                        .WithMany("OrderParts")
+                        .HasForeignKey("PartId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Order");
 
                     b.Navigation("Part");
                 });
@@ -561,7 +568,14 @@ namespace PARTS.DAL.Migrations
 
             modelBuilder.Entity("PARTS.DAL.Entities.Item.Part", b =>
                 {
+                    b.Navigation("OrderParts");
+
                     b.Navigation("PartImage");
+                });
+
+            modelBuilder.Entity("PARTS.DAL.Entities.Order", b =>
+                {
+                    b.Navigation("OrderParts");
                 });
 
             modelBuilder.Entity("PARTS.DAL.Entities.Vehicle.Engine", b =>

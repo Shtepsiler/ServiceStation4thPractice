@@ -28,8 +28,12 @@ namespace ServiceCenterPayment
 
         public static async Task<ServiceCenterPaymentService> DeployContractAndGetServiceAsync(IWeb3 web3, ServiceCenterPaymentDeployment serviceCenterPaymentDeployment, CancellationTokenSource cancellationTokenSource = null)
         {
-            var receipt = await DeployContractAndWaitForReceiptAsync(web3, serviceCenterPaymentDeployment, cancellationTokenSource);
-            return new ServiceCenterPaymentService(web3, receipt.ContractAddress);
+            try
+            {
+                var receipt = await DeployContractAndWaitForReceiptAsync(web3, serviceCenterPaymentDeployment, cancellationTokenSource);
+                return new ServiceCenterPaymentService(web3, receipt.ContractAddress);
+            }
+            catch(Exception e) { throw; }
         }
 
         public ServiceCenterPaymentService(IWeb3 web3, string contractAddress) : base(web3, contractAddress)
