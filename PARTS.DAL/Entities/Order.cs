@@ -1,15 +1,8 @@
-﻿using PARTS.DAL.Entities.Item;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PARTS.DAL.Entities
+﻿namespace PARTS.DAL.Entities
 {
     public class Order : Base
     {
+        public Guid? JobId { get; set; }
         public Guid? СustomerId { get; set; }
         public bool IsPaid { get; set; } = false;
         public Status Status { get; set; } = Status.Pending;
@@ -17,7 +10,7 @@ namespace PARTS.DAL.Entities
         public string WEIPrice { get; set; }
         public string? TransactionHash { get; set; }
 
-        public List<OrderPart> OrderParts { get; set; } = new();
+        public virtual List<OrderPart> OrderParts { get; set; } = new();
 
         public decimal TotalPrice => CalculateTotalPrice();
 
@@ -26,7 +19,7 @@ namespace PARTS.DAL.Entities
             decimal total = 0;
             foreach (var orderPart in OrderParts)
             {
-                if (orderPart.Part.PriceRegular != null)
+                if (orderPart.Part != null && orderPart.Part.PriceRegular != null)
                 {
                     total += orderPart.Part.PriceRegular.Value * orderPart.Quantity;
                 }
@@ -42,7 +35,7 @@ namespace PARTS.DAL.Entities
 
     public enum Status
     {
-        Pending,   
-        Paid      
+        Pending,
+        Paid
     }
 }

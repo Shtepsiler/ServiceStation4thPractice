@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
-using IDENTITY.DAL.Data.Configurations;
+﻿using IDENTITY.DAL.Data.Configurations;
 using IDENTITY.DAL.Entities;
-using Microsoft.Data.SqlClient;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace IDENTITY.DAL.Data
 {
@@ -11,14 +9,9 @@ namespace IDENTITY.DAL.Data
     {
         public AppDBContext(DbContextOptions contextOptions) : base(contextOptions)
         {
-            try
-            {
-                Database.EnsureCreated();
-            }
-            catch (SqlException e)
-            {
-                Task.Delay(1000);
-            }
+
+            // Database.EnsureCreated();
+
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

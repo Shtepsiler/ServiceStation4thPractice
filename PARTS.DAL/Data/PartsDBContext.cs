@@ -1,6 +1,4 @@
-﻿using Bogus;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PARTS.DAL.Data.Configurations;
 using PARTS.DAL.Entities;
 using PARTS.DAL.Entities.Item;
@@ -16,7 +14,7 @@ namespace PARTS.DAL.Data
 
         public PartsDBContext(DbContextOptions contextOptions) : base(contextOptions)
         {
-                Database.EnsureCreated();
+            //  Database.EnsureCreated();
 
         }
 
@@ -46,7 +44,7 @@ namespace PARTS.DAL.Data
 
             modelBuilder.ApplyConfiguration(new BrandConfiguration());
             modelBuilder.ApplyConfiguration(new CategoryImageConfiguration());
-            modelBuilder.ApplyConfiguration(new CategotyConfiguration());
+            modelBuilder.ApplyConfiguration(new CategoryConfiguration());
             modelBuilder.ApplyConfiguration(new EngineConfiguration());
             modelBuilder.ApplyConfiguration(new MakeConfiguration());
             modelBuilder.ApplyConfiguration(new ModelConfiguration());
@@ -54,7 +52,7 @@ namespace PARTS.DAL.Data
             modelBuilder.ApplyConfiguration(new PartImageConfiguration());
             modelBuilder.ApplyConfiguration(new SubModelConfiguration());
             modelBuilder.ApplyConfiguration(new VehicleConfiguration());
-            modelBuilder.ApplyConfiguration(new OrderConfiguration()); 
+            modelBuilder.ApplyConfiguration(new OrderConfiguration());
             modelBuilder.ApplyConfiguration(new OrdersPartsConfiguration());
 
 

@@ -6,12 +6,6 @@ using Moq;
 using PARTS.BLL.DTOs.Requests;
 using PARTS.BLL.DTOs.Responses;
 using PARTS.BLL.Services.Interaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace ServiceStationTests.Tests.APIControllersTests.PartsAPITests
 {
@@ -167,25 +161,6 @@ namespace ServiceStationTests.Tests.APIControllersTests.PartsAPITests
             Assert.IsType<NotFoundResult>(result);
         }
 
-        [Fact]
-        public async Task GetPartsByOrderIdAsync_ReturnsOkResult_WithPartsForOrder()
-        {
-            // Arrange
-            var orderId = Guid.NewGuid();
-            var parts = new List<PartResponse>
-            {
-                new PartResponse { Id = Guid.NewGuid(), PartNumber = "Part1" },
-                new PartResponse { Id = Guid.NewGuid(), PartNumber = "Part2" }
-            };
-            _serviceMock.Setup(service => service.GetPartsByOrderId(orderId)).ReturnsAsync(parts);
 
-            // Act
-            var result = await _controller.GetPartsByOrderIdAsync(orderId);
-
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var returnValue = Assert.IsType<List<PartResponse>>(okResult.Value);
-            Assert.Equal(parts.Count, returnValue.Count());
-        }
     }
 }

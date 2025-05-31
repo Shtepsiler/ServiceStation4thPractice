@@ -1,13 +1,13 @@
 ﻿using System.Net.Http.Headers;
-using System.Text.Json;
 using System.Text;
+using System.Text.Json;
 
 public class AISeeder<T> where T : new()
 {
     private static readonly HttpClient client = new HttpClient();
-    private const string apiKey = "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";
+    private const string apiKey = "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";
     private const string apiEndpoint = "https://api.openai.com/v1/chat/completions";
-     
+
     public AISeeder()
     {
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
@@ -18,14 +18,14 @@ public class AISeeder<T> where T : new()
     {
         var requestBody = new
         {
-            model = "gpt-4o-mini",
+            model = "gpt-3.5-turbo-0125",
             messages = new[]
             {
                 new { role = "system", content = "Generate information for entity fields based on the prompt provided by the user. Avoid introductory phrases, explanations, or conclusions.return json without extra text don`t spcify the type only retunt without ```json```" },
                 new { role = "user", content = prompt }
             }
         };
-        
+
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
         var response = await client.PostAsync(apiEndpoint, content);
         response.EnsureSuccessStatusCode();

@@ -6,5 +6,7 @@ namespace PARTS.BLL.Services.Interaces
 {
     public interface ICategoryService : IGenericService<Category, CategoryRequest, CategoryResponse>
     {
+        public Task<IEnumerable<CategoryResponse?>?> GetLast();
+
     }
 }

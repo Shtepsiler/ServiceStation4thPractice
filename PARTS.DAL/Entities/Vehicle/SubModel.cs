@@ -8,6 +8,7 @@ namespace PARTS.DAL.Entities.Vehicle
         public string? Description { get; set; }
         public string? Transmission { get; set; }
         public int? Weight { get; set; }
+        public Guid? ModelId { get; set; }
 
         public DateTime? Year { get; set; }
         [JsonIgnore] public Model? Model { get; set; }

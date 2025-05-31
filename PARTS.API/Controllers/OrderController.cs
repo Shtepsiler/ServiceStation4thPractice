@@ -1,15 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using System.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
-using System.Text;
-using PARTS.BLL.DTOs.Responses;
 using Newtonsoft.Json;
-using PARTS.DAL.Interfaces;
-using PARTS.BLL.Services.Interaces;
 using PARTS.BLL.DTOs.Requests;
-using System.Reflection.Metadata.Ecma335;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using PARTS.BLL.DTOs.Responses;
+using PARTS.BLL.Services.Interaces;
+using System.Text;
 
 
 namespace ClientPartAPI.Controllers
@@ -18,7 +15,7 @@ namespace ClientPartAPI.Controllers
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Mechanic,User")]
     public class OrderController : ControllerBase
-    { 
+    {
         private readonly IOrderService orderService;
         private readonly ILogger<OrderController>? _logger;
         private readonly IDistributedCache? distributedCache;
@@ -33,7 +30,7 @@ namespace ClientPartAPI.Controllers
             this.distributedCache = distributedCache;
         }
 
-      //  [Authorize]
+        //  [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OrderResponse>>> GetAllAsync()
         {
@@ -54,11 +51,11 @@ namespace ClientPartAPI.Controllers
                 {
                     serializedList = Encoding.UTF8.GetString(redisList);
                     List = JsonConvert.DeserializeObject<List<OrderResponse>>(serializedList);
-                        
+
                 }
                 else
                 {
-                    List = (List<OrderResponse>)await orderService.GetAllAsync(); 
+                    List = (List<OrderResponse>)await orderService.GetAllAsync();
                     serializedList = JsonConvert.SerializeObject(List);
                     redisList = Encoding.UTF8.GetBytes(serializedList);
                     var options = new DistributedCacheEntryOptions()
@@ -77,7 +74,7 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-      //  [Authorize]
+        //  [Authorize]
         [HttpGet("{Id}")]
         public async Task<ActionResult<OrderResponse>> GetByIdAsync(Guid Id)
         {
@@ -104,12 +101,12 @@ namespace ClientPartAPI.Controllers
         }
 
         [HttpGet("GetNewOrder")]
-        public async Task<ActionResult<OrderResponse>> GetNewOrderAsync([FromQuery] Guid userId)
+        public async Task<ActionResult<OrderResponse>> GetNewOrderAsync([FromQuery] Guid userId, [FromQuery] Guid jobId)
         {
             try
-            { 
+            {
 
-                var neworder = new OrderRequest() {Id = Guid.NewGuid(),Timestamp = DateTime.Now,СustomerId = userId};
+                var neworder = new OrderRequest() { Id = Guid.NewGuid(), Timestamp = DateTime.Now, СustomerId = userId, JobId = jobId };
                 await orderService.PostAsync(neworder);
                 if (neworder == null)
                 {
@@ -163,13 +160,13 @@ namespace ClientPartAPI.Controllers
         {
             try
             {
-                
+
                 if (!ModelState.IsValid)
                 {
                     _logger.LogInformation($"Ми отримали некоректний json зі сторони клієнта");
                     return BadRequest("Обєкт Order є некоректним");
                 }
-                await orderService.AddPartToOrderAsync(orderId, partId, quantity == null ? 1: quantity.Value );
+                await orderService.AddPartToOrderAsync(orderId, partId, quantity == null ? 1 : quantity.Value);
 
 
                 return StatusCode(StatusCodes.Status200OK);
@@ -230,7 +227,7 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-     //   [Authorize]
+        //   [Authorize]
         [HttpDelete("{Id}")]
         public async Task<ActionResult> DeleteByIdAsync(Guid id)
         {
@@ -252,6 +249,29 @@ namespace ClientPartAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+
+
+        [HttpGet("Parts")]
+        public async Task<ActionResult<IEnumerable<PartResponse>>> GetPartsByOrderIdAsync([FromQuery] Guid OrderId)
+        {
+            try
+            {
+
+                var List = (List<PartResponse>)await orderService.GetPartsByOrderId(OrderId);
+
+                _logger.LogInformation($"PartController            GetAllAsync");
+                return Ok(List);
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+
+
 
     }
 }

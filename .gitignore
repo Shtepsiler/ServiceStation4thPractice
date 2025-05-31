@@ -380,3 +380,4 @@ FodyWeavers.xsd
 *.db
 /.idea
 /PARTS.API/models.json
+/PARTS.API/Part.json

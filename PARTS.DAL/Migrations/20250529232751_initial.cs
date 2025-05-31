@@ -30,14 +30,21 @@ namespace PARTS.DAL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    ParentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CategoryImageId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Categories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Categories_Categories_ParentId",
+                        column: x => x.ParentId,
+                        principalTable: "Categories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -94,7 +101,8 @@ namespace PARTS.DAL.Migrations
                         name: "FK_CategoryImages_Categories_CategoryId",
                         column: x => x.CategoryId,
                         principalTable: "Categories",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -129,8 +137,8 @@ namespace PARTS.DAL.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Transmission = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Weight = table.Column<int>(type: "int", nullable: true),
-                    Year = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ModelId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Year = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -247,7 +255,8 @@ namespace PARTS.DAL.Migrations
                         name: "FK_Parts_Categories_CategoryId",
                         column: x => x.CategoryId,
                         principalTable: "Categories",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Parts_Vehicles_VehicleId",
                         column: x => x.VehicleId,
@@ -302,6 +311,16 @@ namespace PARTS.DAL.Migrations
                         principalTable: "Parts",
                         principalColumn: "Id");
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Categories_ParentId",
+                table: "Categories",
+                column: "ParentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Categories_Title",
+                table: "Categories",
+                column: "Title");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CategoryImages_CategoryId",

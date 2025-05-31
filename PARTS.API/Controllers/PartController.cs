@@ -1,15 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using System.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
-using System.Text;
-using PARTS.BLL.DTOs.Responses;
 using Newtonsoft.Json;
-using PARTS.DAL.Interfaces;
-using PARTS.BLL.Services.Interaces;
 using PARTS.BLL.DTOs.Requests;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using PARTS.BLL.DTOs.Responses;
+using PARTS.BLL.Services.Interaces;
+using System.Text;
 
 
 namespace ClientPartAPI.Controllers
@@ -18,7 +15,7 @@ namespace ClientPartAPI.Controllers
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Mechanic,User")]
     public class PartController : ControllerBase
-    { 
+    {
         private readonly ILogger<PartController> _logger;
         private readonly IDistributedCache distributedCache;
         private readonly IPartService partService;
@@ -54,7 +51,7 @@ namespace ClientPartAPI.Controllers
                     _logger.LogWarning($"Failed to retrieve data from cache: {e.Message}");
                 }
 
-                if (redisList != null )
+                if (redisList != null)
                 {
                     serializedList = Encoding.UTF8.GetString(redisList);
                     list = JsonConvert.DeserializeObject<List<PartResponse>>(serializedList);
@@ -87,27 +84,6 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-        [HttpGet("GetPartsByOrderId")]
-        public async Task<ActionResult<IEnumerable<PartResponse>>> GetPartsByOrderIdAsync([FromQuery]Guid OrderId)
-        {
-            try
-            {
-
-               
-          
-
-                var List = (List<PartResponse>)await partService.GetPartsByOrderId(OrderId);
-              
-                _logger.LogInformation($"PartController            GetAllAsync");
-                return Ok(List);
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"{ex.Message}");
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
-        }
 
 
 
@@ -137,8 +113,8 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-       
-      //  [Authorize]
+
+        //  [Authorize]
         [HttpPost]
         public async Task<ActionResult> PostAsync([FromBody] PartRequest brand)
         {
@@ -166,8 +142,8 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-      
-      //  [Authorize]
+
+        //  [Authorize]
         [HttpPut]
         public async Task<ActionResult> UpdateAsync([FromBody] PartRequest brand)
         {
@@ -194,7 +170,7 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-     //   [Authorize]
+        //   [Authorize]
         [HttpDelete("{Id}")]
         public async Task<ActionResult> DeleteByIdAsync(Guid id)
         {

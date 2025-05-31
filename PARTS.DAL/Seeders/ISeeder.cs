@@ -1,11 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace PARTS.DAL.Seeders
+namespace PARTS.DAL.Seeders;
+
+public interface ISeeder<T> where T : class
 {
-    public interface ISeeder<T> where T : class
-    {
-        void Seed(EntityTypeBuilder<T> builder);
+    void Seed(EntityTypeBuilder<T> builder);
 
 
-    }
 }

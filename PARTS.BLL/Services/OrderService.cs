@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using PARTS.BLL.DTOs.Requests;
 using PARTS.BLL.DTOs.Responses;
 using PARTS.BLL.Services.Interaces;
@@ -72,13 +71,16 @@ namespace PARTS.BLL.Services
             }
         }
 
+        private readonly SemaphoreSlim _semaphore = new(1, 1);
+
         private async Task ChangePrice(Guid orderId)
         {
+            await _semaphore.WaitAsync();
             try
             {
-                var order = await repository.GetByIdAsync(orderId); // Отримуємо без AsNoTracking()
-
+                var order = await repository.GetByIdAsync(orderId);
                 var ser = await serviceCenterPaymentFactory.CreateServiceAsync();
+
                 var tf = await ser.UpdateOrderRequestAndWaitForReceiptAsync(new()
                 {
                     OrderIndex = (BigInteger)order.OrderIndex.Value,
@@ -87,10 +89,34 @@ namespace PARTS.BLL.Services
                     Price = BigInteger.Parse(order.WEIPrice),
                 });
             }
-            catch (Exception e)
+            finally
             {
-                throw;
+                _semaphore.Release();
             }
         }
+        public async Task<IEnumerable<PartResponse>> GetPartsByOrderId(Guid orderId)
+        {
+            var order = await repository.GetByIdAsync(orderId);
+
+            return order.OrderParts.Select(op => new PartResponse
+            {
+                Id = op.Part.Id,
+                PartNumber = op.Part.PartNumber,
+                ManufacturerNumber = op.Part.ManufacturerNumber,
+                Description = op.Part.Description,
+                PartName = op.Part.PartName,
+                IsUniversal = op.Part.IsUniversal,
+                PriceRegular = op.Part.PriceRegular,
+                PartTitle = op.Part.PartTitle,
+                PartAttributes = op.Part.PartAttributes,
+                IsMadeToOrder = op.Part.IsMadeToOrder,
+                FitNotes = op.Part.FitNotes,
+                Count = op.Part.Count,
+                CategoryId = op.Part.CategoryId,
+                OrderedCount = op.Quantity
+            }).ToList();
+        }
+
+
     }
 }

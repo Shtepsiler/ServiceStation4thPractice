@@ -3,253 +3,346 @@ using PARTS.DAL.Data;
 using PARTS.DAL.Entities.Vehicle;
 using System.Text.Json;
 
-namespace PARTS.DAL.Seeders
+namespace PARTS.DAL.Seeders;
+
+public class ModelSplitter
 {
-    public class ModelSplitter
+    private readonly PartsDBContext _context;
+
+    public ModelSplitter(PartsDBContext context)
     {
-        private PartsDBContext partsDBContext;
+        _context = context;
+    }
 
-        public ModelSplitter(PartsDBContext partsDBContext)
+    public async Task<bool> IsDataPresentAsync()
+    {
+        return await _context.Models.AnyAsync();
+    }
+
+    public async Task SeedAsync()
+    {
+        if (await IsDataPresentAsync())
         {
-            this.partsDBContext = partsDBContext;
-        }
-        public bool isDataPresent()
-        {
-            var ifexist = partsDBContext.Models
-                    .FirstOrDefault() != null ? true : false;
-            return ifexist;
-        }
-
-        public (Make, Model, SubModel, Engine) SplitModelData(Class inputModel)
-        {
-            DateTime DateTimevalue;
-            int intvalue;
-            // Уникнення повторень для Make (перевіряємо чи Make вже існує)
-            Make make = new Make
-            {
-                Title = inputModel.make_display ?? "Unknown Make",
-                Description = null,
-                Сountry = inputModel.make_country,
-                Year = null,
-                Vehicles = new List<Vehicle>(),
-                Models = new List<Model>(),
-                Engines = new List<Engine>()
-            };
-
-            // Створення об'єкта Model
-            Model model = new Model
-            {
-                Title = inputModel.model_name,
-                Description = inputModel.model_id,
-                Seats = inputModel.model_seats,
-                Year = null,
-                Doors = inputModel.model_doors,
-             
-                Vehicles = new List<Vehicle>(),
-                SubModels = new List<SubModel>()
-            };
-
-            if (DateTime.TryParse(inputModel.model_year, out DateTimevalue))
-            {
-                model.Year = DateTimevalue;
-            }
-            // Створення об'єкта SubModel
-            SubModel subModel = new SubModel
-            {
-                Title = inputModel.model_trim ?? "Base SubModel",
-                Description = inputModel.model_trim,
-                Transmission = inputModel.model_transmission_type,
-                Vehicles = new List<Vehicle>(),
-                Engines = new List<Engine>()
-            };
-
-            if (DateTime.TryParse(inputModel.model_year, out DateTimevalue))
-            {
-                subModel.Year = DateTimevalue;
-            }
-            if (int.TryParse(inputModel.model_weight_kg, out intvalue))
-            {
-                subModel.Weight = intvalue;
-            }
-            // Створення об'єкта Engine
-            Engine engine = new Engine
-            {
-                Fuel = inputModel.model_engine_fuel,
-                Model = $"{inputModel.model_engine_position} {inputModel.model_engine_type}", // Зв'язок із Model
-
-                Vehicles = new List<Vehicle>()
-            };
-            if (int.TryParse(inputModel.model_engine_cyl, out intvalue))
-            {
-                engine.Cylinders = intvalue;
-            }
-            if (int.TryParse(inputModel.model_engine_cc, out intvalue))
-            {
-                engine.CC = intvalue;
-            }
-            if (int.TryParse(inputModel.model_engine_power_hp, out intvalue))
-            {
-                engine.HP = intvalue;
-            }
-
-
-   
-
-            return (make, model, subModel, engine);
+            Console.WriteLine("Data already exists. Skipping seed.");
+            return;
         }
 
-        public void Seed()
+        const string jsonFilePath = "models.json";
+        var models = await ReadModelsFromJsonAsync(jsonFilePath);
+
+        if (!models.Any())
         {
-            string jsonFilePath = "models.json";
-            List<Class> models = ReadModelsFromJson(jsonFilePath);
+            Console.WriteLine("No models found in JSON file.");
+            return;
+        }
 
-            foreach (var m in models)
+        await ProcessModelsInBatchesAsync(models);
+    }
+
+    private async Task ProcessModelsInBatchesAsync(List<Class> models)
+    {
+        const int batchSize = 100;
+        var totalBatches = (int)Math.Ceiling((double)models.Count / batchSize);
+
+        // Кеш для уникнення дублікатів
+        var makeCache = new Dictionary<string, Make>();
+        var modelCache = new Dictionary<string, Model>();
+        var subModelCache = new Dictionary<string, SubModel>();
+        var engineCache = new Dictionary<string, Engine>();
+
+        Console.WriteLine($"Processing {models.Count} models in {totalBatches} batches...");
+
+        for (int i = 0; i < totalBatches; i++)
+        {
+            var batch = models.Skip(i * batchSize).Take(batchSize);
+            await ProcessBatchAsync(batch, makeCache, modelCache, subModelCache, engineCache);
+
+            Console.WriteLine($"Processed batch {i + 1}/{totalBatches}");
+        }
+    }
+
+    private async Task ProcessBatchAsync(
+        IEnumerable<Class> batch,
+        Dictionary<string, Make> makeCache,
+        Dictionary<string, Model> modelCache,
+        Dictionary<string, SubModel> subModelCache,
+        Dictionary<string, Engine> engineCache)
+    {
+        var makesToAdd = new List<Make>();
+        var modelsToAdd = new List<Model>();
+        var subModelsToAdd = new List<SubModel>();
+        var enginesToAdd = new List<Engine>();
+
+        foreach (var inputModel in batch)
+        {
+            try
             {
-                var (make, model, subModel, engine) = SplitModelData(m);
+                var (make, model, subModel, engine) = CreateEntitiesFromInput(inputModel);
 
-                // Перевіряємо існування Make
-                var existingMake = partsDBContext.Makes
-                    .FirstOrDefault(x => x.Title == make.Title);
-
-                if (existingMake == null)
+                // Обробка Make
+                if (!makeCache.ContainsKey(make.Title))
                 {
-                    partsDBContext.Makes.Add(make);
+                    makeCache[make.Title] = make;
+                    makesToAdd.Add(make);
                 }
                 else
                 {
-                    make = existingMake;
+                    make = makeCache[make.Title];
                 }
 
-                // Перевіряємо існування Model
-                var existingModel = partsDBContext.Models
-                    .FirstOrDefault(x => x.Title == model.Title);
-
-                if (existingModel == null)
+                // Обробка Model
+                var modelKey = $"{make.Title}_{model.Title}";
+                if (!modelCache.ContainsKey(modelKey))
                 {
-                    partsDBContext.Models.Add(model);
-                    model.Make = make; // Призначаємо Make моделі
+                    model.Make = make;
+                    model.MakeId = make.Id;
+                    modelCache[modelKey] = model;
+                    modelsToAdd.Add(model);
                 }
                 else
                 {
-                    model = existingModel;
+                    model = modelCache[modelKey];
                 }
 
-                // Перевіряємо існування SubModel
-                var existingSubModel = partsDBContext.SubModels
-                    .FirstOrDefault(x => x.Title == subModel.Title);
-
-                if (existingSubModel == null)
+                // Обробка SubModel
+                var subModelKey = $"{modelKey}_{subModel.Title}";
+                if (!subModelCache.ContainsKey(subModelKey))
                 {
-                    partsDBContext.SubModels.Add(subModel);
-                    subModel.Model = model; // Призначаємо Model субмоделі
+                    subModel.Model = model;
+                    subModel.ModelId = model.Id;
+                    subModelCache[subModelKey] = subModel;
+                    subModelsToAdd.Add(subModel);
                 }
                 else
                 {
-                    subModel = existingSubModel;
+                    subModel = subModelCache[subModelKey];
                 }
 
-                // Перевіряємо існування Engine
-                var existingEngine = partsDBContext.Engines
-                    .FirstOrDefault(x => x.Cylinders == engine.Cylinders
-                                      && x.CC == engine.CC
-                                      && x.HP == engine.HP
-                                      && x.Model == engine.Model
-                                      && x.Fuel == engine.Fuel);
-
-                if (existingEngine == null)
+                // Обробка Engine
+                var engineKey = CreateEngineKey(engine, make.Title, subModel.Title);
+                if (!engineCache.ContainsKey(engineKey))
                 {
-                    partsDBContext.Engines.Add(engine);
-                    engine.SubModel = subModel; // Призначаємо SubModel двигуну
-                    engine.Make = make;         // Призначаємо Make двигуну
+                    engine.SubModel = subModel;
+                    engine.SubModelId = subModel.Id;
+                    engine.Make = make;
+                    engine.MakeId = make.Id;
+                    engineCache[engineKey] = engine;
+                    enginesToAdd.Add(engine);
                 }
-                else
-                {
-                    engine = existingEngine;
-                }
-
-                // Пов'язуємо моделі з Make та іншими об'єктами
-                if (!make.Models.Contains(model))
-                {
-                    make.Models.Add(model); // Додаємо модель до списку моделей Make
-                }
-
-                if (!model.SubModels.Contains(subModel))
-                {
-                    model.SubModels.Add(subModel); // Додаємо субмодель до списку субмоделей Model
-                }
-
-                if (!subModel.Engines.Contains(engine))
-                {
-                    subModel.Engines.Add(engine); // Додаємо двигун до списку двигунів SubModel
-                }
-                partsDBContext.SaveChanges();
             }
-        }
-
-
-
-        public void seedVehicles()
-        {
-            if (!partsDBContext.Vehicles.Any())
+            catch (Exception ex)
             {
-                Vehicle vehicle1 = new Vehicle()
-                {
-                    Id = Guid.Parse("dc238098-d210-44f3-778e-08dc7b9965a3"),
-                    VIN = "asd1w1vvcve1e1ew",
-                    Year = DateTime.Now.AddYears(-10),
-                    Timestamp = DateTime.Now,
-                    Make = partsDBContext.Makes.Include(p => p.Models).ThenInclude(p => p.SubModels).ThenInclude(p => p.Engines).ElementAtOrDefault(0),
-                    Model = partsDBContext.Makes.Include(p => p.Models).ThenInclude(p => p.SubModels).ThenInclude(p => p.Engines).ElementAtOrDefault(0)?.Models?.ElementAtOrDefault(0),
-                    SubModel = partsDBContext.Makes.Include(p => p.Models).ThenInclude(p => p.SubModels).ThenInclude(p => p.Engines).ElementAtOrDefault(0)?.Models?.ElementAtOrDefault(0)?.SubModels?.ElementAtOrDefault(0),
-                    Engine = partsDBContext.Makes.Include(p => p.Models).ThenInclude(p => p.SubModels).ThenInclude(p => p.Engines).ElementAtOrDefault(0)?.Models?.ElementAtOrDefault(0)?.SubModels?.ElementAtOrDefault(0)?.Engines?.ElementAtOrDefault(0),
-                };
-
-                Vehicle vehicle2 = new Vehicle()
-                {
-                    Id = Guid.Parse("dc238098-d410-44f3-778e-08dc7b9965a3"),
-                    VIN = "asd1w1we1e1e1ew",
-                    Year = DateTime.Now.AddYears(-10),
-                    Timestamp = DateTime.Now,
-                    Make = partsDBContext.Makes.Include(p=>p.Models).ThenInclude(p=>p.SubModels).ThenInclude(p=>p.Engines).ElementAtOrDefault(1),
-                    Model = partsDBContext.Makes.Include(p => p.Models).ThenInclude(p => p.SubModels).ThenInclude(p => p.Engines).ElementAtOrDefault(1)?.Models?.ElementAtOrDefault(0),
-                    SubModel = partsDBContext.Makes.Include(p => p.Models).ThenInclude(p => p.SubModels).ThenInclude(p => p.Engines).ElementAtOrDefault(1)?.Models?.ElementAtOrDefault(0)?.SubModels?.ElementAtOrDefault(0),
-                    Engine = partsDBContext.Makes.Include(p => p.Models).ThenInclude(p => p.SubModels).ThenInclude(p => p.Engines).ElementAtOrDefault(1)?.Models?.ElementAtOrDefault(0)?.SubModels?.ElementAtOrDefault(0)?.Engines?.ElementAtOrDefault(0),
-                };
-
-                Vehicle vehicle3 = new Vehicle()
-                {
-                    Id = Guid.Parse("88C2A122-9E71-4A7A-A52D-9F82A6610D87"),
-                    VIN = "asd1w1we1e1ennfdew",
-                    Year = DateTime.Now.AddYears(-10),
-                    Timestamp = DateTime.Now,
-                    Make = partsDBContext.Makes.Include(p => p.Models).ThenInclude(p => p.SubModels).ThenInclude(p => p.Engines).ElementAtOrDefault(2),
-                    Model = partsDBContext.Makes.Include(p => p.Models).ThenInclude(p => p.SubModels).ThenInclude(p => p.Engines).ElementAtOrDefault(2)?.Models.ElementAtOrDefault(0),
-                    SubModel = partsDBContext.Makes.Include(p => p.Models).ThenInclude(p => p.SubModels).ThenInclude(p => p.Engines).ElementAtOrDefault(2)?.Models.ElementAtOrDefault(0)?.SubModels.ElementAtOrDefault(0),
-                    Engine = partsDBContext.Makes.Include(p => p.Models).ThenInclude(p => p.SubModels).ThenInclude(p => p.Engines).ElementAtOrDefault(2)?.Models.ElementAtOrDefault(0)?.SubModels.ElementAtOrDefault(0)?.Engines.ElementAtOrDefault(0),
-                };
-
-
-                partsDBContext.Vehicles.Add(vehicle1);
-                partsDBContext.Vehicles.Add(vehicle2);
-                partsDBContext.Vehicles.Add(vehicle3);
-                partsDBContext.SaveChanges();
-
-
+                Console.WriteLine($"Failed to process model: {ex.Message}");
             }
         }
 
+        // Збереження в правильному порядку
+        await SaveEntitiesBatchAsync(makesToAdd, modelsToAdd, subModelsToAdd, enginesToAdd);
+    }
 
+    private async Task SaveEntitiesBatchAsync(
+        List<Make> makes,
+        List<Model> models,
+        List<SubModel> subModels,
+        List<Engine> engines)
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync();
 
-
-
-
-        List<Class> ReadModelsFromJson(string filePath)
+        try
         {
-            string jsonString = File.ReadAllText(filePath);
-            return JsonSerializer.Deserialize<List<Class>>(jsonString);
+            if (makes.Any())
+            {
+                await _context.Makes.AddRangeAsync(makes);
+                await _context.SaveChangesAsync();
+            }
+
+            if (models.Any())
+            {
+                await _context.Models.AddRangeAsync(models);
+                await _context.SaveChangesAsync();
+            }
+
+            if (subModels.Any())
+            {
+                await _context.SubModels.AddRangeAsync(subModels);
+                await _context.SaveChangesAsync();
+            }
+
+            if (engines.Any())
+            {
+                await _context.Engines.AddRangeAsync(engines);
+                await _context.SaveChangesAsync();
+            }
+
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    private (Make, Model, SubModel, Engine) CreateEntitiesFromInput(Class inputModel)
+    {
+        var make = new Make
+        {
+            Id = Guid.NewGuid(),
+            Title = inputModel.make_display?.Trim() ?? "Unknown Make",
+            Description = null,
+            Сountry = inputModel.make_country?.Trim(),
+            Year = null,
+            Timestamp = DateTime.UtcNow
+        };
+
+        var model = new Model
+        {
+            Id = Guid.NewGuid(),
+            Title = inputModel.model_name?.Trim() ?? "Unknown Model",
+            Description = inputModel.model_id?.Trim(),
+            Seats = inputModel.model_seats?.Trim(),
+            Doors = inputModel.model_doors?.Trim(),
+            Year = TryParseDateTime(inputModel.model_year),
+            Timestamp = DateTime.UtcNow
+        };
+
+        var subModel = new SubModel
+        {
+            Id = Guid.NewGuid(),
+            Title = inputModel.model_trim?.Trim() ?? "Base SubModel",
+            Description = inputModel.model_trim?.Trim(),
+            Transmission = inputModel.model_transmission_type?.Trim(),
+            Year = TryParseDateTime(inputModel.model_year),
+            Weight = TryParseInt(inputModel.model_weight_kg),
+            Timestamp = DateTime.UtcNow
+        };
+
+        var engine = new Engine
+        {
+            Id = Guid.NewGuid(),
+            Fuel = inputModel.model_engine_fuel?.Trim(),
+            Model = $"{inputModel.model_engine_position?.Trim()} {inputModel.model_engine_type?.Trim()}".Trim(),
+            Cylinders = TryParseInt(inputModel.model_engine_cyl),
+            CC = TryParseInt(inputModel.model_engine_cc),
+            HP = TryParseInt(inputModel.model_engine_power_hp),
+            Year = TryParseDateTime(inputModel.model_year),
+            Timestamp = DateTime.UtcNow
+        };
+
+        return (make, model, subModel, engine);
+    }
+
+    private static string CreateEngineKey(Engine engine, string makeName, string subModelName)
+    {
+        return $"{makeName}_{subModelName}_{engine.Cylinders}_{engine.CC}_{engine.HP}_{engine.Model}_{engine.Fuel}";
+    }
+
+    private static DateTime? TryParseDateTime(string? input)
+    {
+        return DateTime.TryParse(input, out var result) ? result : null;
+    }
+
+    private static int? TryParseInt(string? input)
+    {
+        return int.TryParse(input, out var result) ? result : null;
+    }
+
+    private async Task<List<Class>> ReadModelsFromJsonAsync(string filePath)
+    {
+        try
+        {
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException($"JSON file not found: {filePath}");
+            }
+
+            var jsonString = await File.ReadAllTextAsync(filePath);
+
+            if (string.IsNullOrWhiteSpace(jsonString))
+            {
+                return new List<Class>();
+            }
+
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                AllowTrailingCommas = true
+            };
+
+            return JsonSerializer.Deserialize<List<Class>>(jsonString, options) ?? new List<Class>();
+        }
+        catch (JsonException ex)
+        {
+            Console.WriteLine($"Failed to parse JSON: {ex.Message}");
+            return new List<Class>();
+        }
+    }
+
+    public async Task SeedVehiclesAsync()
+    {
+        if (await _context.Vehicles.AnyAsync())
+        {
+            Console.WriteLine("Vehicles already exist. Skipping seed.");
+            return;
         }
 
+        var sampleMakes = await _context.Makes
+            .Include(m => m.Models)
+            .ThenInclude(m => m.SubModels)
+            .ThenInclude(sm => sm.Engines)
+            .Take(3)
+            .ToListAsync();
 
+        if (!sampleMakes.Any())
+        {
+            Console.WriteLine("No makes found. Cannot seed vehicles.");
+            return;
+        }
 
+        var vehicles = CreateSampleVehicles(sampleMakes);
+
+        await _context.Vehicles.AddRangeAsync(vehicles);
+        await _context.SaveChangesAsync();
+
+        Console.WriteLine($"Seeded {vehicles.Count} vehicles.");
+    }
+
+    private List<Vehicle> CreateSampleVehicles(List<Make> makes)
+    {
+        var vehicles = new List<Vehicle>();
+        var vehicleIds = new[]
+        {
+            Guid.Parse("dc238098-d210-44f3-778e-08dc7b9965a3"),
+            Guid.Parse("dc238098-d410-44f3-778e-08dc7b9965a3"),
+            Guid.Parse("88C2A122-9E71-4A7A-A52D-9F82A6610D87")
+        };
+
+        var vins = new[] { "asd1w1vvcve1e1ew", "asd1w1we1e1e1ew", "asd1w1we1e1ennfdew" };
+
+        for (int i = 0; i < Math.Min(makes.Count, 3); i++)
+        {
+            var make = makes[i];
+            var model = make.Models?.FirstOrDefault();
+            var subModel = model?.SubModels?.FirstOrDefault();
+            var engine = subModel?.Engines?.FirstOrDefault();
+
+            if (model != null)
+            {
+                vehicles.Add(new Vehicle
+                {
+                    Id = vehicleIds[i],
+                    VIN = vins[i],
+                    Year = DateTime.UtcNow.AddYears(-10),
+                    Timestamp = DateTime.UtcNow,
+                    MakeId = make.Id,
+                    ModelId = model.Id,
+                    SubModelId = subModel?.Id,
+                    EngineId = engine?.Id,
+                    FullModelName = $"{make.Title} {model.Title} {subModel?.Title}".Trim()
+                });
+            }
+        }
+
+        return vehicles;
     }
 }

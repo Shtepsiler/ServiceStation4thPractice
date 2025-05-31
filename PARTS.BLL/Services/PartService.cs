@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
-using Azure.Core;
 using PARTS.BLL.DTOs.Requests;
 using PARTS.BLL.DTOs.Responses;
 using PARTS.BLL.Services.Interaces;
 using PARTS.DAL.Entities.Item;
 using PARTS.DAL.Interfaces;
-using System.Runtime.CompilerServices;
 
 namespace PARTS.BLL.Services
 {
@@ -38,7 +36,7 @@ namespace PARTS.BLL.Services
             {
                 var entity = _mapper.Map<PartRequest, Part>(request);
 
-                
+
                 await _repository.UpdateAsync(entity);
                 return _mapper.Map<Part, PartResponse>(entity);
 

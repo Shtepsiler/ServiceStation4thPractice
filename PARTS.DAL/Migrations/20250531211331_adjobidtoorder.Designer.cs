@@ -12,15 +12,15 @@ using PARTS.DAL.Data;
 namespace PARTS.DAL.Migrations
 {
     [DbContext(typeof(PartsDBContext))]
-    [Migration("20250520211127_initial")]
-    partial class initial
+    [Migration("20250531211331_adjobidtoorder")]
+    partial class adjobidtoorder
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("ProductVersion", "9.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -55,16 +55,25 @@ namespace PARTS.DAL.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ParentId");
+
+                    b.HasIndex("Title");
 
                     b.ToTable("Categories");
                 });
@@ -216,6 +225,9 @@ namespace PARTS.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
+
+                    b.Property<Guid?>("JobId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int?>("OrderIndex")
                         .HasColumnType("int");
@@ -441,11 +453,22 @@ namespace PARTS.DAL.Migrations
                     b.ToTable("Vehicles");
                 });
 
+            modelBuilder.Entity("PARTS.DAL.Entities.Item.Category", b =>
+                {
+                    b.HasOne("PARTS.DAL.Entities.Item.Category", "ParentCategory")
+                        .WithMany("SupCategories")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("ParentCategory");
+                });
+
             modelBuilder.Entity("PARTS.DAL.Entities.Item.CategoryImage", b =>
                 {
                     b.HasOne("PARTS.DAL.Entities.Item.Category", "Category")
                         .WithOne("CategoryImage")
-                        .HasForeignKey("PARTS.DAL.Entities.Item.CategoryImage", "CategoryId");
+                        .HasForeignKey("PARTS.DAL.Entities.Item.CategoryImage", "CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Category");
                 });
@@ -458,7 +481,8 @@ namespace PARTS.DAL.Migrations
 
                     b.HasOne("PARTS.DAL.Entities.Item.Category", "Category")
                         .WithMany("Parts")
-                        .HasForeignKey("CategoryId");
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("PARTS.DAL.Entities.Vehicle.Vehicle", null)
                         .WithMany("Parts")
@@ -567,6 +591,8 @@ namespace PARTS.DAL.Migrations
                     b.Navigation("CategoryImage");
 
                     b.Navigation("Parts");
+
+                    b.Navigation("SupCategories");
                 });
 
             modelBuilder.Entity("PARTS.DAL.Entities.Item.Part", b =>

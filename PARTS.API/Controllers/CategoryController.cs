@@ -1,14 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using System.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
-using System.Text;
-using PARTS.BLL.DTOs.Responses;
 using Newtonsoft.Json;
-using PARTS.DAL.Interfaces;
-using PARTS.BLL.Services.Interaces;
 using PARTS.BLL.DTOs.Requests;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using PARTS.BLL.DTOs.Responses;
+using PARTS.BLL.Services.Interaces;
+using System.Text;
 
 
 namespace ClientPartAPI.Controllers
@@ -17,7 +15,7 @@ namespace ClientPartAPI.Controllers
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Mechanic,User")]
     public class CategoryController : ControllerBase
-    { 
+    {
         private readonly ILogger<CategoryController>? _logger;
         private readonly IDistributedCache? distributedCache;
         private readonly ICategoryService categoryService;
@@ -46,19 +44,19 @@ namespace ClientPartAPI.Controllers
                 try
                 {
                     redisList = await distributedCache.GetAsync(cacheKey);
-       
+
                 }
                 catch (Exception e)
                 {
                     _logger.LogWarning($"Failed to retrieve data from cache: {e.Message}");
                 }
 
-                if (redisList != null )
+                if (redisList != null)
                 {
 
-                        serializedList = Encoding.UTF8.GetString(redisList);
-                        List = JsonConvert.DeserializeObject<List<CategoryResponse>>(serializedList);
-                  
+                    serializedList = Encoding.UTF8.GetString(redisList);
+                    List = JsonConvert.DeserializeObject<List<CategoryResponse>>(serializedList);
+
                 }
                 else
                 {
@@ -80,6 +78,61 @@ namespace ClientPartAPI.Controllers
 
                 _logger.LogInformation($"CategoryController GetAllAsync");
                 return Ok(List);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpGet("LastChildrens")]
+        public async Task<ActionResult<IEnumerable<CategoryResponse>>> GetLastChildrens()
+        {
+            try
+            {
+                var cacheKey = "CategoryList";
+                string serializedList;
+                var List = new List<CategoryResponse>();
+                byte[]? redisList = null;
+
+                try
+                {
+                    redisList = await distributedCache.GetAsync(cacheKey);
+
+                }
+                catch (Exception e)
+                {
+                    _logger.LogWarning($"Failed to retrieve data from cache: {e.Message}");
+                }
+
+                if (redisList != null)
+                {
+
+                    serializedList = Encoding.UTF8.GetString(redisList);
+                    List = JsonConvert.DeserializeObject<List<CategoryResponse>>(serializedList);
+
+                }
+                else
+                {
+                    List = (List<CategoryResponse>)await categoryService.GetLast();
+                    try
+                    {
+                        serializedList = JsonConvert.SerializeObject(List);
+                        redisList = Encoding.UTF8.GetBytes(serializedList);
+                        var options = new DistributedCacheEntryOptions()
+                            .SetAbsoluteExpiration(DateTime.Now.AddMinutes(5))
+                            .SetSlidingExpiration(TimeSpan.FromMinutes(1));
+                        await distributedCache.SetAsync(cacheKey, redisList, options);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogWarning($"Failed to set data to cache: {e.Message}");
+                    }
+                }
+
+                _logger.LogInformation($"CategoryController GetAllAsync");
+                return Ok(List.Select(p => p.Title).ToList());
             }
             catch (Exception ex)
             {
@@ -115,8 +168,8 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-       
-      //  [Authorize]
+
+        //  [Authorize]
         [HttpPost]
         public async Task<ActionResult> PostAsync([FromBody] CategoryRequest brand)
         {
@@ -144,8 +197,8 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-      
-      //  [Authorize]
+
+        //  [Authorize]
         [HttpPut("{Id}")]
         public async Task<ActionResult> UpdateAsync([FromBody] CategoryRequest brand)
         {
@@ -172,7 +225,7 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-     //   [Authorize]
+        //   [Authorize]
         [HttpDelete("{Id}")]
         public async Task<ActionResult> DeleteByIdAsync(Guid id)
         {

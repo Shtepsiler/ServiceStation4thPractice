@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PARTS.DAL.Entities.Item;
-using PARTS.DAL.Seeders;
 namespace PARTS.DAL.Data.Configurations
 {
     public class PartConfiguration : IEntityTypeConfiguration<Part>
@@ -10,11 +9,10 @@ namespace PARTS.DAL.Data.Configurations
         {
             builder.HasKey(p => p.Id);
 
-            builder.HasOne(pi => pi.PartImage).WithOne(p => p.Part).HasForeignKey<PartImage>(ci => ci.PartId); 
+            builder.HasOne(pi => pi.PartImage).WithOne(p => p.Part).HasForeignKey<PartImage>(ci => ci.PartId);
 
             builder.HasOne(p => p.Category)
-                              .WithMany(c => c.Parts)
-                              .HasForeignKey(p => p.CategoryId);
+                              .WithMany(c => c.Parts);
 
             builder.HasMany(p => p.OrderParts)
                    .WithOne(p => p.Part);

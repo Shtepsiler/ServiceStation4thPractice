@@ -6,6 +6,7 @@ namespace PARTS.BLL.DTOs.Requests
     public class OrderRequest : BaseDTO
     {
         public Guid? СustomerId { get; set; }
+        public Guid? JobId { get; set; }
         public int? OrderIndex { get; set; }
         public decimal TotalPrice { get; set; }
         public string? WEIPrice { get; set; }

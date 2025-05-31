@@ -1,10 +1,8 @@
-using Ocelot.DependencyInjection;
-using Ocelot.Cache.CacheManager;
-using Ocelot.Middleware;
-using MMLib.SwaggerForOcelot.DependencyInjection;
-using Ocelot.Provider.Polly;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using MMLib.SwaggerForOcelot.DependencyInjection;
+using Ocelot.DependencyInjection;
+using Ocelot.Middleware;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);

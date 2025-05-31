@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PARTS.DAL.Data;
 
@@ -11,9 +12,11 @@ using PARTS.DAL.Data;
 namespace PARTS.DAL.Migrations
 {
     [DbContext(typeof(PartsDBContext))]
-    partial class PartsDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250529232751_initial")]
+    partial class initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -222,9 +225,6 @@ namespace PARTS.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
-
-                    b.Property<Guid?>("JobId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int?>("OrderIndex")
                         .HasColumnType("int");

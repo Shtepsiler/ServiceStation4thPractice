@@ -1,29 +1,42 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
+# PARTS.API/Dockerfile
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
-USER app
 WORKDIR /app
 EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:8080
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["PARTS.API/PARTS.API.csproj", "PARTS.API/"]
-COPY ["PARTS.BLL/PARTS.BLL.csproj", "PARTS.BLL/"]
+
+# Copy project files in dependency order
 COPY ["PARTS.DAL/PARTS.DAL.csproj", "PARTS.DAL/"]
-RUN dotnet restore "./PARTS.API/./PARTS.API.csproj"
+COPY ["PARTS.BLL/PARTS.BLL.csproj", "PARTS.BLL/"]
+COPY ["PARTS.API/PARTS.API.csproj", "PARTS.API/"]
+COPY ["ServiceCenterPayment/ServiceCenterPayment.csproj", "ServiceCenterPayment/"]
+
+# Restore dependencies
+RUN dotnet restore "PARTS.API/PARTS.API.csproj"
+
+# Copy source code and models.json
 COPY . .
 WORKDIR "/src/PARTS.API"
-RUN dotnet dev-certs https
-RUN dotnet dev-certs https --trust
-RUN dotnet build "./PARTS.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
+# Build (removed dev-certs as they're not needed in containers)
+RUN dotnet build "PARTS.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./PARTS.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "PARTS.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+# Copy models.json to the working directory
+COPY ["PARTS.API/models.json", "./models.json"]
+
+# Install curl for health checks
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 ENTRYPOINT ["dotnet", "PARTS.API.dll"]
