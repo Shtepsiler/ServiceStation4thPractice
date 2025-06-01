@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using PARTS.API.Helpers;
 using PARTS.BLL.DTOs.Requests;
 using PARTS.BLL.DTOs.Responses;
 using PARTS.BLL.Services.Interaces;
@@ -9,8 +10,10 @@ namespace PARTS.BLL.Services
 {
     public class PartService : GenericService<Part, PartRequest, PartResponse>, IPartService
     {
+        private IPartRepository repo;
         public PartService(IPartRepository repository, IMapper mapper) : base(repository, mapper)
         {
+            repo = repository;
         }
 
         public async Task<IEnumerable<PartResponse>> GetPartsByOrderId(Guid orderId)
@@ -47,7 +50,20 @@ namespace PARTS.BLL.Services
             }
         }
 
+        public async Task<Pagination<PartResponse>> GetPaginatedAsync(int pageNumber, int pageSize, string? search = null, Guid? categoryId = null)
+        {
+            try
+            {
+                var (items, totalCount) = await repo.GetPaginatedAsync(pageNumber, pageSize, search, categoryId);
+                var mappedItems = _mapper.Map<List<PartResponse>>(items);
+                return new Pagination<PartResponse>(mappedItems.ToList(), totalCount, pageNumber, pageSize);
 
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
 
     }
 }

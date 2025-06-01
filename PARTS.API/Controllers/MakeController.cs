@@ -1,25 +1,21 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using System.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
-using System.Text;
-using PARTS.BLL.DTOs.Responses;
 using Newtonsoft.Json;
-using PARTS.DAL.Interfaces;
-using PARTS.BLL.Services.Interaces;
+using PARTS.API.Helpers;
 using PARTS.BLL.DTOs.Requests;
-using ClientPartAPI.Helpers;
-using PARTS.BLL.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using PARTS.BLL.DTOs.Responses;
+using PARTS.BLL.Services.Interaces;
+using System.Text;
 
-
-namespace ClientPartAPI.Controllers
+namespace PARTS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Mechanic,User")]
     public class MakeController : ControllerBase
-    { 
+    {
         private readonly ILogger<MakeController> _logger;
         private readonly IDistributedCache distributedCache;
         private readonly IMakeService makeService;
@@ -103,8 +99,8 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-       
-      //  [Authorize]
+
+        //  [Authorize]
         [HttpPost]
         public async Task<ActionResult> PostAsync([FromBody] MakeRequest brand)
         {
@@ -132,8 +128,8 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-      
-      //  [Authorize]
+
+        //  [Authorize]
         [HttpPut("{Id}")]
         public async Task<ActionResult> UpdateAsync([FromBody] MakeRequest brand)
         {
@@ -160,7 +156,7 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-     //   [Authorize]
+        //   [Authorize]
         [HttpDelete("{Id}")]
         public async Task<ActionResult> DeleteByIdAsync(Guid id)
         {

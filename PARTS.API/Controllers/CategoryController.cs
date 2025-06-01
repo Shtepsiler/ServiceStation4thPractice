@@ -8,8 +8,7 @@ using PARTS.BLL.DTOs.Responses;
 using PARTS.BLL.Services.Interaces;
 using System.Text;
 
-
-namespace ClientPartAPI.Controllers
+namespace PARTS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

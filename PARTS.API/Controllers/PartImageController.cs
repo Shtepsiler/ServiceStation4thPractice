@@ -1,23 +1,20 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using System.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
-using System.Text;
-using PARTS.BLL.DTOs.Responses;
 using Newtonsoft.Json;
-using PARTS.DAL.Interfaces;
-using PARTS.BLL.Services.Interaces;
 using PARTS.BLL.DTOs.Requests;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using PARTS.BLL.DTOs.Responses;
+using PARTS.BLL.Services.Interaces;
+using System.Text;
 
-
-namespace ClientPartAPI.Controllers
+namespace PARTS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Mechanic,User")]
     public class PartImageController : ControllerBase
-    { 
+    {
         private readonly ILogger<PartImageController> _logger;
         private readonly IDistributedCache distributedCache;
         private readonly IPartImageService partImageService;
@@ -33,7 +30,7 @@ namespace ClientPartAPI.Controllers
             this.partImageService = PartImageService;
         }
 
-      //  [Authorize]
+        //  [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PartImageResponse>>> GetAllAsync()
         {
@@ -51,7 +48,7 @@ namespace ClientPartAPI.Controllers
                 }
                 else
                 {
-                    List = (List<PartImageResponse>)await partImageService.GetAllAsync(); 
+                    List = (List<PartImageResponse>)await partImageService.GetAllAsync();
                     serializedList = JsonConvert.SerializeObject(List);
                     redisList = Encoding.UTF8.GetBytes(serializedList);
                     var options = new DistributedCacheEntryOptions()
@@ -70,7 +67,7 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-      //  [Authorize]
+        //  [Authorize]
         [HttpGet("{Id}")]
         public async Task<ActionResult<PartImageResponse>> GetByIdAsync(Guid Id)
         {
@@ -96,8 +93,8 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-       
-      //  [Authorize]
+
+        //  [Authorize]
         [HttpPost]
         public async Task<ActionResult> PostAsync([FromBody] PartImageRequest brand)
         {
@@ -125,8 +122,8 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-      
-      //  [Authorize]
+
+        //  [Authorize]
         [HttpPut("{Id}")]
         public async Task<ActionResult> UpdateAsync([FromBody] PartImageRequest brand)
         {
@@ -153,7 +150,7 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-     //   [Authorize]
+        //   [Authorize]
         [HttpDelete("{Id}")]
         public async Task<ActionResult> DeleteByIdAsync(Guid id)
         {

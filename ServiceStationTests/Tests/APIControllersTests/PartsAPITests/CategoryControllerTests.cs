@@ -1,12 +1,10 @@
-﻿using ClientPartAPI.Controllers;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Moq;
+using PARTS.API.Controllers;
 using PARTS.BLL.DTOs.Requests;
 using PARTS.BLL.DTOs.Responses;
-using System.Text;
-using Newtonsoft.Json;
 using PARTS.BLL.Services.Interaces;
 
 namespace ServiceStationTests.Tests.APIControllersTests.PartsAPITests

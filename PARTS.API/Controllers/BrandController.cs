@@ -1,24 +1,20 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using System.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
-using System.Text;
-using PARTS.BLL.DTOs.Responses;
 using Newtonsoft.Json;
-using PARTS.DAL.Interfaces;
-using PARTS.BLL.Services.Interaces;
 using PARTS.BLL.DTOs.Requests;
-using System.Reflection.Metadata.Ecma335;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using PARTS.BLL.DTOs.Responses;
+using PARTS.BLL.Services.Interaces;
+using System.Text;
 
-
-namespace ClientPartAPI.Controllers
+namespace PARTS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Mechanic,User")]
     public class BrandController : ControllerBase
-    { 
+    {
         private readonly IBrandService brandService;
         private readonly ILogger<BrandController>? _logger;
         private readonly IDistributedCache? distributedCache;
@@ -33,7 +29,7 @@ namespace ClientPartAPI.Controllers
             this.distributedCache = distributedCache;
         }
 
-      //  [Authorize]
+        //  [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BrandResponse>>> GetAllAsync()
         {
@@ -55,8 +51,8 @@ namespace ClientPartAPI.Controllers
 
                 if (redisList != null)
                 {
-                        serializedList = Encoding.UTF8.GetString(redisList);
-                        List = JsonConvert.DeserializeObject<List<BrandResponse>>(serializedList);
+                    serializedList = Encoding.UTF8.GetString(redisList);
+                    List = JsonConvert.DeserializeObject<List<BrandResponse>>(serializedList);
                 }
                 else
                 {
@@ -88,7 +84,7 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-      //  [Authorize]
+        //  [Authorize]
         [HttpGet("{Id}")]
         public async Task<ActionResult<BrandResponse>> GetByIdAsync(Guid Id)
         {
@@ -169,7 +165,7 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-     //   [Authorize]
+        //   [Authorize]
         [HttpDelete("{Id}")]
         public async Task<ActionResult> DeleteByIdAsync(Guid id)
         {

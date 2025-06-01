@@ -2,6 +2,8 @@
 using System.Text;
 using System.Text.Json;
 
+namespace PARTS.DAL.Seeders;
+
 public class AISeeder<T> where T : new()
 {
     private static readonly HttpClient client = new HttpClient();

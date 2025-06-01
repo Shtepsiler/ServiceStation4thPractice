@@ -1,23 +1,20 @@
-﻿          using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using System.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
-using System.Text;
-using PARTS.BLL.DTOs.Responses;
 using Newtonsoft.Json;
-using PARTS.DAL.Interfaces;
-using PARTS.BLL.Services.Interaces;
 using PARTS.BLL.DTOs.Requests;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using PARTS.BLL.DTOs.Responses;
+using PARTS.BLL.Services.Interaces;
+using System.Text;
 
-
-namespace ClientPartAPI.Controllers
+namespace PARTS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Mechanic,User")]
     public class VehicleController : ControllerBase
-    { 
+    {
         private readonly ILogger<VehicleController> _logger;
         private readonly IDistributedCache distributedCache;
         private readonly IVehicleService vehicleService;
@@ -32,7 +29,7 @@ namespace ClientPartAPI.Controllers
             this.vehicleService = VehicleService;
         }
 
-      //  [Authorize]
+        //  [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<VehicleResponse>>> GetAllAsync()
         {
@@ -48,7 +45,7 @@ namespace ClientPartAPI.Controllers
                     redisList = await distributedCache.GetAsync(cacheKey);
 
                 }
-                catch (Exception e) 
+                catch (Exception e)
                 {
                     _logger.LogWarning($"Failed to retrieve data from cache: {e.Message}");
                 }
@@ -60,7 +57,8 @@ namespace ClientPartAPI.Controllers
                 else
                 {
                     List = (List<VehicleResponse>)await vehicleService.GetAllAsync();
-                    try{
+                    try
+                    {
                         serializedList = JsonConvert.SerializeObject(List);
                         redisList = Encoding.UTF8.GetBytes(serializedList);
                         var options = new DistributedCacheEntryOptions()
@@ -68,9 +66,9 @@ namespace ClientPartAPI.Controllers
                             .SetSlidingExpiration(TimeSpan.FromMinutes(1));
                         await distributedCache.SetAsync(cacheKey, redisList, options);
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
-                     _logger.LogWarning($"Failed to set data to cache: {e.Message}");
+                        _logger.LogWarning($"Failed to set data to cache: {e.Message}");
                     }
 
                 }
@@ -85,7 +83,7 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-      //  [Authorize]
+        //  [Authorize]
         [HttpGet("{Id}")]
         public async Task<ActionResult<VehicleResponse>> GetByIdAsync(Guid Id)
         {
@@ -112,7 +110,7 @@ namespace ClientPartAPI.Controllers
         }
 
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-         
+
         //  [Authorize]
         [HttpPost]
         public async Task<ActionResult<VehicleResponse>> PostAsync([FromBody] VehicleRequest req)
@@ -129,10 +127,10 @@ namespace ClientPartAPI.Controllers
                     _logger.LogInformation($"Ми отримали некоректний json зі сторони клієнта");
                     return BadRequest("Обєкт Vehicle є некоректним");
                 }
-               var res =  await vehicleService.PostAsync(req);
+                var res = await vehicleService.PostAsync(req);
 
 
-                return Created("",res);
+                return Created("", res);
             }
             catch (Exception ex)
             {
@@ -141,8 +139,8 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-      
-      //  [Authorize]
+
+        //  [Authorize]
         [HttpPut("{Id}")]
         public async Task<ActionResult> UpdateAsync([FromBody] VehicleRequest req)
         {
@@ -169,7 +167,7 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-     //   [Authorize]
+        //   [Authorize]
         [HttpDelete("{Id}")]
         public async Task<ActionResult> DeleteByIdAsync(Guid id)
         {
@@ -203,7 +201,7 @@ namespace ClientPartAPI.Controllers
                     return BadRequest("Обєкт Vehicle є null");
                 }
                 if (!ModelState.IsValid)
-                { 
+                {
                     _logger.LogInformation($"Ми отримали некоректний json зі сторони клієнта");
                     return BadRequest("Обєкт Vehicle є некоректним");
                 }

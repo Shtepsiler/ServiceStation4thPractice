@@ -3,13 +3,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
+using PARTS.API.Helpers;
 using PARTS.BLL.DTOs.Requests;
 using PARTS.BLL.DTOs.Responses;
 using PARTS.BLL.Services.Interaces;
 using System.Text;
 
-
-namespace ClientPartAPI.Controllers
+namespace PARTS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -30,7 +30,29 @@ namespace ClientPartAPI.Controllers
             this.distributedCache = distributedCache;
             this.partService = PartService;
         }
+        [HttpGet("paginated")]
+        public async Task<ActionResult<Pagination<PartResponse>>> GetPaginatedAsync(
+            [FromQuery] PaginationParams paginationParams,
+            [FromQuery] string? search,
+            [FromQuery] Guid? categoryId)
+        {
+            try
+            {
+                var paginatedResult = await partService.GetPaginatedAsync(
+                    paginationParams.PageNumber,
+                    paginationParams.PageSize,
+                    search,
+                    categoryId);
 
+                _logger.LogInformation($"PartController GetPaginatedAsync - Page {paginationParams.PageNumber}");
+                return Ok(paginatedResult);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
         //  [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PartResponse>>> GetAllAsync()

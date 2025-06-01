@@ -1,24 +1,20 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using System.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
-using System.Text;
-using PARTS.BLL.DTOs.Responses;
 using Newtonsoft.Json;
-using PARTS.DAL.Interfaces;
-using PARTS.BLL.Services.Interaces;
 using PARTS.BLL.DTOs.Requests;
-using PARTS.BLL.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using PARTS.BLL.DTOs.Responses;
+using PARTS.BLL.Services.Interaces;
+using System.Text;
 
-
-namespace ClientPartAPI.Controllers
+namespace PARTS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Mechanic,User")]
     public class SubModelController : ControllerBase
-    { 
+    {
         private readonly ILogger<SubModelController> _logger;
         private readonly IDistributedCache distributedCache;
         private readonly ISubModelService subModelService;
@@ -34,7 +30,7 @@ namespace ClientPartAPI.Controllers
             this.subModelService = SubModelService;
         }
 
-      //  [Authorize]
+        //  [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SubModelResponse>>> GetAllAsync()
         {
@@ -52,7 +48,7 @@ namespace ClientPartAPI.Controllers
                 }
                 else
                 {
-                    List = (List<SubModelResponse>)await subModelService.GetAllAsync(); 
+                    List = (List<SubModelResponse>)await subModelService.GetAllAsync();
                     serializedList = JsonConvert.SerializeObject(List);
                     redisList = Encoding.UTF8.GetBytes(serializedList);
                     var options = new DistributedCacheEntryOptions()
@@ -71,7 +67,7 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-      //  [Authorize]
+        //  [Authorize]
         [HttpGet("{Id}")]
         public async Task<ActionResult<SubModelResponse>> GetByIdAsync(Guid Id)
         {
@@ -97,8 +93,8 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-       
-      //  [Authorize]
+
+        //  [Authorize]
         [HttpPost]
         public async Task<ActionResult> PostAsync([FromBody] SubModelRequest brand)
         {
@@ -126,8 +122,8 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-      
-      //  [Authorize]
+
+        //  [Authorize]
         [HttpPut("{Id}")]
         public async Task<ActionResult> UpdateAsync([FromBody] SubModelRequest brand)
         {
@@ -154,7 +150,7 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-     //   [Authorize]
+        //   [Authorize]
         [HttpDelete("{Id}")]
         public async Task<ActionResult> DeleteByIdAsync(Guid id)
         {

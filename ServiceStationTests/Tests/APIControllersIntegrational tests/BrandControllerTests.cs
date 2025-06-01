@@ -1,21 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using Xunit;
-using FluentAssertions;
+﻿using FluentAssertions;
 using PARTS.BLL.DTOs.Requests;
 using PARTS.BLL.DTOs.Responses;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
-using Microsoft.AspNetCore.Http.HttpResults;
-using System.Text.Json.Serialization.Metadata;
+using ServiceStationTests.Mocks.PartsApi;
+using System.Text;
+using System.Text.Json;
+using Program = PARTS.API.Program;
 
-namespace ClientPartAPI.IntegrationTests
+namespace ServiceStationTests.Tests.APIControllersIntegrational_tests
 {
-    public class BrandControllerTests : IClassFixture<CustomWebApplicationFactory<PARTS.API.Program>>
+    public class BrandControllerTests : IClassFixture<CustomWebApplicationFactory<Program>>
     {
         private readonly HttpClient _client;
 
@@ -37,14 +30,14 @@ namespace ClientPartAPI.IntegrationTests
 
             brands.Should().NotBeNull();
             brands.Should().HaveCountGreaterThan(0);
-        } 
+        }
 
 
         [Fact]
         public async Task GetByIdAsync_ReturnsOkResult_WithBrand()
         {
             // Arrange
-            var brandId = Guid.Parse("b5a0c2e2-324f-42d3-b299-28d2e12a5260"); 
+            var brandId = Guid.Parse("b5a0c2e2-324f-42d3-b299-28d2e12a5260");
 
             // Act
             var response = await _client.GetAsync($"/api/Brand/{brandId}");
@@ -112,7 +105,7 @@ namespace ClientPartAPI.IntegrationTests
         public async Task UpdateAsync_ReturnsNoContent_WhenBrandIsUpdated()
         {
             // Arrange
-            var brandRequest = new BrandRequest { Id = Guid.Parse("35a3c232-334f-32d3-3299-38d2e12a5260"), Title = "Brand X" }; 
+            var brandRequest = new BrandRequest { Id = Guid.Parse("35a3c232-334f-32d3-3299-38d2e12a5260"), Title = "Brand X" };
             var content = new StringContent(JsonSerializer.Serialize(brandRequest), Encoding.UTF8, "application/json");
 
             // Act

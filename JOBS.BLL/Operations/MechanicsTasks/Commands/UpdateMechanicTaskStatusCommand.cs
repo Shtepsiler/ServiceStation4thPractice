@@ -1,26 +1,19 @@
-﻿using JOBS.BLL.Operations.MechanicsTasks.Commands;
-using JOBS.DAL.Data;
+﻿using JOBS.DAL.Data;
 using JOBS.DAL.Entities;
 using JOBS.DAL.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace JOBS.BLL.Operations.MechanicsTasks.Commands
+namespace JOBS.BLL.Operations.MechanicsTasks.Commands;
+
+public class UpdateMechanicTaskStatusCommand : IRequest
 {
-    public class UpdateMechanicTaskStatusCommand: IRequest
-    {
-        [FromQuery]
-        public Guid Id { get; set; }
-        [FromQuery]
-        public Status Status { get; set; }
+    [FromQuery]
+    public Guid Id { get; set; }
+    [FromQuery]
+    public Status Status { get; set; }
 
-    }
 }
 
 public class UpdateMechanicTaskStatusCommandCommandHandler : IRequestHandler<UpdateMechanicTaskStatusCommand>
@@ -55,11 +48,11 @@ public class UpdateMechanicTaskStatusCommandCommandHandler : IRequestHandler<Upd
         // Перевіряємо статуси завдань
         if (job.Tasks.All(t => t.Status == Status.Completed))
         {
-            job.Status = Status.Completed; 
+            job.Status = Status.Completed;
         }
         else
         {
-            job.Status = Status.InProgress; 
+            job.Status = Status.InProgress;
         }
         await _context.SaveChangesAsync(cancellationToken);
     }

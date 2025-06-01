@@ -3,10 +3,8 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using PARTS.DAL.Data;
-using PARTS.DAL.Seeders;
-using System.Linq;
 
-namespace ClientPartAPI.IntegrationTests
+namespace ServiceStationTests.Mocks.PartsApi
 {
     public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProgram> where TProgram : class
     {
@@ -40,7 +38,7 @@ namespace ClientPartAPI.IntegrationTests
                     // Ensure the database is created.
                     db.Database.EnsureCreated();
 
-                   // Seed.Initialize(scope.ServiceProvider);
+                    // Seed.Initialize(scope.ServiceProvider);
 
                     // Seed the database with test data if necessary.
                 }
