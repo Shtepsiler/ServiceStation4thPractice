@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using PARTS.BLL.DTOs.Requests;
 using PARTS.BLL.DTOs.Responses;
 using PARTS.BLL.Services.Interaces;
+using PARTS.DAL.Data;
 using PARTS.DAL.Entities;
+using PARTS.DAL.Entities.Item;
 using PARTS.DAL.Interfaces;
 using ServiceCenterPayment;
 using System.Numerics;
@@ -12,14 +15,18 @@ namespace PARTS.BLL.Services
     public class OrderService : GenericService<Order, OrderRequest, OrderResponse>, IOrderService
     {
         private readonly IOrderRepository repository;
+        private readonly IPartRepository partRepository;
         private readonly IServiceCenterPaymentServiceFactory serviceCenterPaymentFactory;
+        private readonly PartsDBContext context;
 
-        public OrderService(IOrderRepository repository, IMapper mapper, IServiceCenterPaymentServiceFactory serviceCenterPayment)
+        public OrderService(IPartRepository partrepository, IOrderRepository repository, IMapper mapper, IServiceCenterPaymentServiceFactory serviceCenterPayment, PartsDBContext context)
             : base(repository, mapper)
         {
+            partRepository = partrepository;
             this.repository = repository;
             serviceCenterPaymentFactory = serviceCenterPayment;
-            OnPriceUpdated += ChangePrice;
+            this.context = context;
+            //  OnPriceUpdated += ChangePrice;
         }
         // Делегат для оновлення ціни
         public delegate Task PriceUpdatedHandler(Guid orderId);
@@ -70,6 +77,81 @@ namespace PARTS.BLL.Services
                 await OnPriceUpdated(orderId);
             }
         }
+
+        public async Task<IEnumerable<PartResponse>> AddPartsByCategoriesAsync(AddPartsByCategoryRequest request)
+        {
+            var parts = new List<Part>();
+            var categoryParts = await partRepository.GetAsync();
+            foreach (var categoryName in request.Categories)
+            {
+                var catParts = categoryParts.Where(p =>
+                    p.Category.Title == categoryName);
+                var selectedPart = catParts.FirstOrDefault();
+                if (selectedPart != null)
+                {
+                    parts.Add(selectedPart);
+                }
+            }
+
+            // Завантажи order з OrderParts з бази даних
+            var order = await repository.GetByIdAsync(request.OrderId);
+            if (order != null)
+            {
+                foreach (var part in parts)
+                {
+                    // Перевір існування OrderPart безпосередньо в базі даних
+                    var existingOrderPart = await context.OrdersParts
+                        .FirstOrDefaultAsync(op => op.OrderId == request.OrderId && op.PartId == part.Id);
+
+                    if (existingOrderPart != null)
+                    {
+                        // OrderPart існує в базі, оновлюємо кількість
+                        existingOrderPart.Quantity += 1;
+                        context.OrdersParts.Update(existingOrderPart);
+                    }
+                    else
+                    {
+                        // OrderPart не існує, створюємо новий
+                        var newOrderPart = new OrderPart
+                        {
+                            OrderId = order.Id,
+                            PartId = part.Id,
+                            Quantity = 1
+                        };
+                        await context.OrdersParts.AddAsync(newOrderPart);
+                    }
+                }
+
+                // Збереги зміни
+                await context.SaveChangesAsync();
+
+                // Trigger price update event
+                if (OnPriceUpdated != null)
+                {
+                    await OnPriceUpdated(order.Id);
+                }
+            }
+
+            return parts.Select(p => new PartResponse
+            {
+                Id = p.Id,
+                PartNumber = p.PartNumber,
+                ManufacturerNumber = p.ManufacturerNumber,
+                Description = p.Description,
+                PartName = p.PartName,
+                IsUniversal = p.IsUniversal,
+                PriceRegular = p.PriceRegular,
+                PartTitle = p.PartTitle,
+                PartAttributes = p.PartAttributes,
+                IsMadeToOrder = p.IsMadeToOrder,
+                FitNotes = p.FitNotes,
+                Count = p.Count,
+                CategoryId = p.CategoryId
+            });
+        }
+
+
+
 
         private readonly SemaphoreSlim _semaphore = new(1, 1);
 

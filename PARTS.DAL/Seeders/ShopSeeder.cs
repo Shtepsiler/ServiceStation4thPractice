@@ -24,7 +24,7 @@ public class ShopSeeder
 
         await SeedBrandsAsync();
         await SeedCategoriesAsync();
-        await SeedPartsAsync();
+        await SeedPartsNoAIAsync();
 
         Console.WriteLine("Shop seeding completed successfully!");
     }
@@ -131,6 +131,49 @@ public class ShopSeeder
         {
             await transaction.RollbackAsync();
             Console.WriteLine($"Failed to seed categories: {ex.Message}");
+            throw;
+        }
+    }
+    private async Task SeedPartsNoAIAsync()
+    {
+        if (await _context.Parts.AnyAsync())
+        {
+            Console.WriteLine("Parts already exist. Skipping Parts seeding.");
+            return;
+        }
+
+        Console.WriteLine("Seeding Parts...");
+
+        using var transaction = await _context.Database.BeginTransactionAsync();
+
+        try
+        {
+            //  await _context.Database.ExecuteSqlRawAsync("ALTER TABLE Categories NOCHECK CONSTRAINT FK_Categories_Categories_ParentId");
+
+            // Seed main categories first
+            var parts = PartsData.GetParts();
+            if (parts?.Any() == true)
+            {
+                foreach (var part in parts)
+                {
+                    part.Timestamp = DateTime.UtcNow;
+                    await _context.Parts.AddAsync(part);
+                    await _context.SaveChangesAsync();
+                }
+
+
+                Console.WriteLine($"Seeded {parts.Count} Parts.");
+            }
+
+            await transaction.CommitAsync();
+            //    await _context.Database.ExecuteSqlRawAsync("ALTER TABLE Categories CHECK CONSTRAINT FK_Categories_Categories_ParentId");
+            await _context.SaveChangesAsync();
+
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            Console.WriteLine($"Failed to seed Parts: {ex.Message}");
             throw;
         }
     }

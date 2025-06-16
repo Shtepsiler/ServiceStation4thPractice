@@ -381,3 +381,4 @@ FodyWeavers.xsd
 /.idea
 /PARTS.API/models.json
 /PARTS.API/Part.json
+/PARTS.DAL/Seeders/PartsData.cs

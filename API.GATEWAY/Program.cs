@@ -1,3 +1,4 @@
+using API.GATEWAY;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using MMLib.SwaggerForOcelot.DependencyInjection;
@@ -53,6 +54,13 @@ builder.Services.AddAuthentication(opt =>
 
 /*builder.Services.AddCors();
 */
+builder.Services.AddRequestLogging(options =>
+{
+    options.LogRequestHeaders = false;
+    options.LogResponseHeaders = false;
+    options.LogRequestBody = false;
+    options.LogResponseBody = false;
+});
 builder.Services.AddOcelot();
 
 
@@ -76,6 +84,8 @@ app.UseSwaggerUI(c =>
 });
 app.UseSwaggerUI();
 app.UseStaticFiles();
+app.UseRequestLogging();
+
 
 app.UseSwaggerForOcelotUI(opt =>
 {

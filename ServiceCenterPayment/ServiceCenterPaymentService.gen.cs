@@ -1,42 +1,30 @@
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Numerics;
-using Nethereum.Hex.HexTypes;
-using Nethereum.ABI.FunctionEncoding.Attributes;
-using Nethereum.Web3;
-using Nethereum.RPC.Eth.DTOs;
-using Nethereum.Contracts.CQS;
 using Nethereum.Contracts.ContractHandlers;
-using Nethereum.Contracts;
-using System.Threading;
+using Nethereum.RPC.Eth.DTOs;
+using Nethereum.Web3;
 using ServiceCenterPayment.ContractDefinition;
+using System.Numerics;
 
 namespace ServiceCenterPayment
 {
     public partial class ServiceCenterPaymentService : ServiceCenterPaymentServiceBase
     {
-        public static Task<TransactionReceipt> DeployContractAndWaitForReceiptAsync(IWeb3 web3, ServiceCenterPaymentDeployment serviceCenterPaymentDeployment, CancellationTokenSource cancellationTokenSource = null)
+        public static Task<TransactionReceipt> DeployContractAndWaitForReceiptAsync(Nethereum.Web3.IWeb3 web3, ServiceCenterPaymentDeployment serviceCenterPaymentDeployment, CancellationTokenSource cancellationTokenSource = null)
         {
             return web3.Eth.GetContractDeploymentHandler<ServiceCenterPaymentDeployment>().SendRequestAndWaitForReceiptAsync(serviceCenterPaymentDeployment, cancellationTokenSource);
         }
 
-        public static Task<string> DeployContractAsync(IWeb3 web3, ServiceCenterPaymentDeployment serviceCenterPaymentDeployment)
+        public static Task<string> DeployContractAsync(Nethereum.Web3.IWeb3 web3, ServiceCenterPaymentDeployment serviceCenterPaymentDeployment)
         {
             return web3.Eth.GetContractDeploymentHandler<ServiceCenterPaymentDeployment>().SendRequestAsync(serviceCenterPaymentDeployment);
         }
 
-        public static async Task<ServiceCenterPaymentService> DeployContractAndGetServiceAsync(IWeb3 web3, ServiceCenterPaymentDeployment serviceCenterPaymentDeployment, CancellationTokenSource cancellationTokenSource = null)
+        public static async Task<ServiceCenterPaymentService> DeployContractAndGetServiceAsync(Nethereum.Web3.IWeb3 web3, ServiceCenterPaymentDeployment serviceCenterPaymentDeployment, CancellationTokenSource cancellationTokenSource = null)
         {
-            try
-            {
-                var receipt = await DeployContractAndWaitForReceiptAsync(web3, serviceCenterPaymentDeployment, cancellationTokenSource);
-                return new ServiceCenterPaymentService(web3, receipt.ContractAddress);
-            }
-            catch(Exception e) { throw; }
+            var receipt = await DeployContractAndWaitForReceiptAsync(web3, serviceCenterPaymentDeployment, cancellationTokenSource);
+            return new ServiceCenterPaymentService(web3, receipt.ContractAddress);
         }
 
-        public ServiceCenterPaymentService(IWeb3 web3, string contractAddress) : base(web3, contractAddress)
+        public ServiceCenterPaymentService(Nethereum.Web3.IWeb3 web3, string contractAddress) : base(web3, contractAddress)
         {
         }
 
@@ -46,7 +34,7 @@ namespace ServiceCenterPayment
     public partial class ServiceCenterPaymentServiceBase : ContractWeb3ServiceBase, IServiceCenterPaymentServiceBase
     {
 
-        public ServiceCenterPaymentServiceBase(IWeb3 web3, string contractAddress) : base(web3, contractAddress)
+        public ServiceCenterPaymentServiceBase(Nethereum.Web3.IWeb3 web3, string contractAddress) : base(web3, contractAddress)
         {
         }
 

@@ -11,7 +11,7 @@ namespace JOBS.BLL.DTOs.Respponces
         public Guid Id { get; set; }
         public Guid? ManagerId { get; set; }
         public Guid VehicleId { get; set; }
-        public string? ModelName {  get; set; }
+        public string? ModelName { get; set; }
         public string? Status { get; set; }
         public Guid ClientId { get; set; }
         public Guid? MechanicId { get; set; }
@@ -23,6 +23,7 @@ namespace JOBS.BLL.DTOs.Respponces
         public float? ModelConfidence { get; set; } = null;
         public int? jobIndex { get; set; }
         public bool IsPaid { get; set; }
+        public string? PredictionId { get; set; }
         public void Mapping(Profile profile)
         {
             profile.CreateMap<JobDTO, Job>().ReverseMap();

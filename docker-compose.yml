@@ -108,10 +108,10 @@ services:
     networks:
       - ServiceStationPartsNetwork
     ports:
-      - "2030:8080"
+      - "2030:8084"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_URLS=http://+:8084
       - REDIS=RedisCash:6379
       - DB_HOST=PartsDatabase
       - DB_USER=sa
@@ -143,10 +143,10 @@ services:
     networks:
       - ServiceStationPartsNetwork
     ports:
-      - "2040:8081"
+      - "2040:8083"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:8081
+      - ASPNETCORE_URLS=http://+:8083
       - REDIS=RedisCash:6379
       - DB_HOST=JobsDatabase      
       - DB_USER=sa
@@ -211,12 +211,12 @@ services:
     networks:
       - ServiceStationPartsNetwork
     ports:
-      - "2060:8083"
+      - "2060:8081"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:8083
-      - PARTS_API_URL=http://partsapi:8080
-      - JOBS_API_URL=http://jobsapi:8081
+      - ASPNETCORE_URLS=http://+:8081
+      - PARTS_API_URL=http://partsapi:8084
+      - JOBS_API_URL=http://jobsapi:8083
       - IDENTITY_API_URL=http://identityapi:8082
     depends_on:
       identity.api:
@@ -245,7 +245,30 @@ services:
     #   interval: 30s
     #   timeout: 10s
     #   retries: 3
-
+  ppml.api:
+   container_name: ppmlapi
+   image: ${DOCKER_REGISTRY-}parts_prediction:latest
+   networks:
+     - ServiceStationPartsNetwork
+   ports:
+     - "2080:8000"
+   environment:
+     - REDIS_HOST=rediscash
+     - REDIS_PORT=6379
+     - REDIS_DB=1
+     - MODEL_PATH=/app/model_lstm_best.pth
+     - LOG_LEVEL=INFO
+   depends_on:
+     rediscash:
+       condition: service_healthy
+   restart: unless-stopped
+   # healthcheck:
+   #   test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+   #   interval: 30s
+   #   timeout: 10s
+   #   retries: 3
+   #   start_period: 120s
+ 
 volumes:
   identity_data:
     driver: local

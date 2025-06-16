@@ -199,12 +199,15 @@ public class Program
 
     private static void ConfigureHttpClients(WebApplicationBuilder builder)
     {
-        var apiBaseString = builder.Configuration["APIBaseString"]
-            ?? throw new InvalidOperationException("APIBaseString configuration is required");
-
-        builder.Services.AddHttpClient("Model", client =>
+        var MechanicModelBaseString = builder.Configuration["MechanicModelBaseString"]
+                                      ?? throw new InvalidOperationException("APIBaseString configuration is required");
+        var PartsModelBaseString = builder.Configuration["PartsModelBaseString"]
+                                      ?? throw new InvalidOperationException("APIBaseString configuration is required");
+        var PartsApiBaseString = builder.Configuration["PartsApiBaseString"]
+                                      ?? throw new InvalidOperationException("APIBaseString configuration is required");
+        builder.Services.AddHttpClient("MechanicModel", client =>
         {
-            client.BaseAddress = new Uri(apiBaseString);
+            client.BaseAddress = new Uri(MechanicModelBaseString);
             client.DefaultRequestHeaders.Add("Accept", "application/json");
             client.DefaultRequestHeaders.Add("User-Agent", "JobsAPI/1.0");
             client.Timeout = TimeSpan.FromSeconds(30);
@@ -228,7 +231,58 @@ public class Program
         })
         .AddPolicyHandler(GetRetryPolicy())
         .AddPolicyHandler(GetCircuitBreakerPolicy());
+        builder.Services.AddHttpClient("PartsModel", client =>
+            {
+                client.BaseAddress = new Uri(PartsModelBaseString);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+                client.DefaultRequestHeaders.Add("User-Agent", "JobsAPI/1.0");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            })
+            .ConfigurePrimaryHttpMessageHandler(() =>
+            {
+                var handler = new HttpClientHandler()
+                {
+                    CookieContainer = new CookieContainer(),
+                    UseCookies = true
+                };
 
+                // Only ignore SSL errors in development
+                if (builder.Environment.IsDevelopment())
+                {
+                    handler.ServerCertificateCustomValidationCallback =
+                        (message, cert, chain, errors) => true;
+                }
+
+                return handler;
+            })
+            .AddPolicyHandler(GetRetryPolicy())
+            .AddPolicyHandler(GetCircuitBreakerPolicy());
+        builder.Services.AddHttpClient("PartsApi", client =>
+            {
+                client.BaseAddress = new Uri(PartsApiBaseString);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+                client.DefaultRequestHeaders.Add("User-Agent", "JobsAPI/1.0");
+                client.Timeout = TimeSpan.FromSeconds(30);
+            })
+            .ConfigurePrimaryHttpMessageHandler(() =>
+            {
+                var handler = new HttpClientHandler()
+                {
+                    CookieContainer = new CookieContainer(),
+                    UseCookies = true
+                };
+
+                // Only ignore SSL errors in development
+                if (builder.Environment.IsDevelopment())
+                {
+                    handler.ServerCertificateCustomValidationCallback =
+                        (message, cert, chain, errors) => true;
+                }
+
+                return handler;
+            })
+            .AddPolicyHandler(GetRetryPolicy())
+            .AddPolicyHandler(GetCircuitBreakerPolicy());
         // Health check client
         builder.Services.AddHttpClient("HealthCheck", client =>
         {

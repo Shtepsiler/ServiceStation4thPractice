@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-
-namespace JOBS.DAL.Entities
+﻿namespace JOBS.DAL.Entities
 {
     public class Job
     {
@@ -25,6 +20,9 @@ namespace JOBS.DAL.Entities
         public bool ModelAproved { get; set; } = false;
         public int? jobIndex { get; set; }
         public string? WEIPrice { get; set; }
+        public string? PredictionId { get; set; }
+
+
 
         public List<MechanicsTasks>? Tasks { get; set; }
         public Mechanic Mechanic { get; set; }

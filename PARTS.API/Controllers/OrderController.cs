@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
 using PARTS.BLL.DTOs.Requests;
@@ -12,7 +10,7 @@ namespace PARTS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Mechanic,User")]
+    //Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Mechanic,User")]
     public class OrderController : ControllerBase
     {
         private readonly IOrderService orderService;
@@ -29,7 +27,7 @@ namespace PARTS.API.Controllers
             this.distributedCache = distributedCache;
         }
 
-        //  [Authorize]
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OrderResponse>>> GetAllAsync()
         {
@@ -268,6 +266,29 @@ namespace PARTS.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+        [HttpPost("AddPartsByCategory")]
+        public async Task<ActionResult<IEnumerable<PartResponse>>> AddPartsByCategoryAsync([FromBody] AddPartsByCategoryRequest request)
+        {
+            try
+            {
+
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogInformation($"Ми отримали некоректний json зі сторони клієнта");
+                    return BadRequest("Обєкт Order є некоректним");
+                }
+                var resp = await orderService.AddPartsByCategoriesAsync(request);
+
+
+                return Ok(resp);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Транзакція сфейлилась! Щось пішло не так у методі PostAsync - {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
 
 
 

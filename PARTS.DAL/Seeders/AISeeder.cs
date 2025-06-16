@@ -7,7 +7,7 @@ namespace PARTS.DAL.Seeders;
 public class AISeeder<T> where T : new()
 {
     private static readonly HttpClient client = new HttpClient();
-    private const string apiKey = "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";
+    private const string apiKey = "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";
     private const string apiEndpoint = "https://api.openai.com/v1/chat/completions";
 
     public AISeeder()
@@ -20,7 +20,7 @@ public class AISeeder<T> where T : new()
     {
         var requestBody = new
         {
-            model = "gpt-3.5-turbo-0125",
+            model = "gpt-4o-mini",
             messages = new[]
             {
                 new { role = "system", content = "Generate information for entity fields based on the prompt provided by the user. Avoid introductory phrases, explanations, or conclusions.return json without extra text don`t spcify the type only retunt without ```json```" },

@@ -1,4 +1,5 @@
-﻿using JOBS.BLL.Common.Validation;
+﻿using JOBS.BLL.Common.Helpers;
+using JOBS.BLL.Common.Validation;
 using JOBS.BLL.DTOs.Respponces;
 using JOBS.BLL.Operations.Jobs.Commands;
 using JOBS.BLL.Operations.Jobs.Queries;
@@ -46,7 +47,7 @@ namespace JOBS.API.Controllers
             }
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Mechainc,User")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin, Mechanic, User")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -76,11 +77,11 @@ namespace JOBS.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> AddOrderToJobAsync([FromQuery]AddOrderToJobCommand comand)
+        public async Task<IActionResult> AddOrderToJobAsync([FromQuery] AddOrderToJobCommand comand)
         {
             try
             {
-               
+
                 if (ModelState.IsValid)
                 {
                     await Mediator.Send(comand);
@@ -200,6 +201,57 @@ namespace JOBS.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin, Mechanic")]
+        [HttpGet("GetJobByMechanicIdPaginated")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<Pagination<JobDTO>>> GetJobByMechanicIdPaginatedAsync([FromQuery] GetJobsByMechanicIdPaginatedQuery query)
+        {
+            try
+            {
+                var responce = (Pagination<JobDTO>)await Mediator.Send(query);
+                return Ok(responce);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin, Mechanic")]
+        [HttpGet("GetJobsBYUserIdPaginated")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<Pagination<JobDTO>>> GetJobsBYUserIdPaginatedAsync([FromQuery] GetJobsByUserIdPaginatedQuery query)
+        {
+            try
+            {
+                var responce = (Pagination<JobDTO>)await Mediator.Send(query);
+                return Ok(responce);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin, Mechanic")]
+        [HttpGet("GetJobsPaginated")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<Pagination<JobDTO>>> GetJobsPaginatedAsync([FromQuery] GetAllJobsPaginatedQuery query)
+        {
+            try
+            {
+                var responce = (Pagination<JobDTO>)await Mediator.Send(query);
+                return Ok(responce);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin, Mechanic, User")]
         [HttpGet("GetJobsBYUserId")]
@@ -295,7 +347,7 @@ namespace JOBS.API.Controllers
             try
             {
                 // Викликаємо запит через Mediator
-                var result = await Mediator.Send(new GetUncertainSamplesQuery { Confidence = confidence, ChoseApproverd = choseApproverd});
+                var result = await Mediator.Send(new GetUncertainSamplesQuery { Confidence = confidence, ChoseApproverd = choseApproverd });
 
                 // Перевіряємо, чи були знайдені дані
                 if (result == null || !result.new_data.Any())

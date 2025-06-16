@@ -14,7 +14,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "jobsapi",
-          "Port": "8081"
+          "Port": "8083"
         }
       ]
 
@@ -34,7 +34,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "jobsapi",
-          "Port": "8081"
+          "Port": "8083"
 
         }
       ]

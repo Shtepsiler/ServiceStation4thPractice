@@ -1,9 +1,6 @@
 ﻿using JOBS.DAL.Data;
 using JOBS.DAL.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace JOBS.BLL.Helpers
 {
@@ -15,45 +12,48 @@ namespace JOBS.BLL.Helpers
             DateTime plannedStartDate,
             TimeSpan estimatedTaskDuration)
         {
-            // Крок 1: Фільтруємо механіків за спеціалізацією
-            var filteredMechanics = context.Mechanics.Include(p=>p.Specialisation).ToList()
+            // Filter mechanics by specialization at DB level
+            var availableMechanic = context.Mechanics
+                .Include(m => m.Specialisation)
+                .Include(m => m.MechanicsTasks)
                 .Where(m => m.Specialisation.Id == requiredSpecialisation.Id)
-                .ToList();
-
-            // Крок 2: Знаходимо механіка з найменшим навантаженням
-            var availableMechanic = filteredMechanics
+                .AsEnumerable() // Switch to client-side evaluation for complex calculations
                 .Select(m => new
                 {
                     Mechanic = m,
                     NextAvailableTime = GetNextAvailableTime(m, plannedStartDate),
-                    TotalWorkload = m.MechanicsTasks
-                        .Where(t => t.FinishDate == null || t.FinishDate > plannedStartDate)
-                        .Sum(t => (t.FinishDate ?? plannedStartDate).Subtract(t.IssueDate).TotalHours)
+                    ActiveWorkload = m.MechanicsTasks
+                        .Where(t => t.FinishDate == null || t.FinishDate > DateTime.Now)
+                        .Sum(t => GetTaskDuration(t, DateTime.Now))
                 })
-                .OrderBy(m => m.NextAvailableTime)  // Найшвидше доступний
-                .ThenBy(m => m.TotalWorkload)       // Найменше навантаження
+                .OrderBy(m => m.NextAvailableTime)
+                .ThenBy(m => m.ActiveWorkload)
                 .FirstOrDefault();
 
-            // Якщо знайдено механіка, повертаємо його
             return availableMechanic?.Mechanic;
         }
 
         private static DateTime GetNextAvailableTime(Mechanic mechanic, DateTime plannedStartDate)
         {
-            // Отримуємо всі завдання механіка, які ще активні після вказаної дати
             var activeTasks = mechanic.MechanicsTasks
                 .Where(t => t.FinishDate == null || t.FinishDate > plannedStartDate)
                 .OrderBy(t => t.IssueDate)
                 .ToList();
 
-            // Якщо немає активних завдань, механік доступний на заплановану дату
             if (!activeTasks.Any())
                 return plannedStartDate;
 
-            // Розраховуємо найближчий доступний момент після завершення останнього завдання
+            // Find the latest finish time among active tasks
             DateTime lastTaskFinish = activeTasks
-                .Max(t => t.FinishDate ?? t.IssueDate.AddHours(1)); // Якщо FinishDate немає, припускаємо 1 годину тривалості
+                .Max(t => t.FinishDate ?? t.IssueDate.AddDays(1)); // More realistic default duration
+
             return lastTaskFinish > plannedStartDate ? lastTaskFinish : plannedStartDate;
+        }
+
+        private static double GetTaskDuration(MechanicsTasks task, DateTime referenceDate)
+        {
+            var endDate = task.FinishDate ?? referenceDate;
+            return Math.Max(0, endDate.Subtract(task.IssueDate).TotalHours);
         }
     }
 

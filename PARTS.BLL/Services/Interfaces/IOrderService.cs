@@ -9,6 +9,6 @@ namespace PARTS.BLL.Services.Interaces
         Task AddPartToOrderAsync(Guid orderId, Guid partId, int quantity);
         Task RemovePartFromOrderAsync(Guid orderId, Guid partId);
         Task<IEnumerable<PartResponse>> GetPartsByOrderId(Guid orderId);
-
+        Task<IEnumerable<PartResponse>> AddPartsByCategoriesAsync(AddPartsByCategoryRequest request);
     }
 }

@@ -1,11 +1,6 @@
 ﻿using AutoMapper;
 using JOBS.BLL.Common.Mappings;
 using JOBS.DAL.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace JOBS.BLL.DTOs.Respponces
 {
@@ -30,12 +25,13 @@ namespace JOBS.BLL.DTOs.Respponces
         public int jobIndex { get; set; }
         public bool IsPaid { get; set; }
         public string? WEIPrice { get; set; }
+        public string? PredictionId { get; set; }
 
         public List<MechanicsTasksDTO> Tasks { get; set; }
 
         public void Mapping(Profile profile)
         {
-            profile.CreateMap<JobWithTasksDTO, Job>().ReverseMap().ForMember(p=>p.Tasks,map=>map.MapFrom(p=>p.Tasks)).ReverseMap();
+            profile.CreateMap<JobWithTasksDTO, Job>().ReverseMap().ForMember(p => p.Tasks, map => map.MapFrom(p => p.Tasks)).ReverseMap();
         }
 
     }

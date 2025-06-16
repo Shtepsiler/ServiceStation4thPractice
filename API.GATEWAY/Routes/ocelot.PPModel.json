@@ -1,7 +1,7 @@
 ﻿{
   "Routes": [
     {
-      "UpstreamPathTemplate": "/specialisaton-model/{everything}",
+      "UpstreamPathTemplate": "/parts-model/{everything}",
       "UpstreamHttpMethod": [
         "GET",
         "POST",
@@ -12,7 +12,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "mlapi",
+          "Host": "ppmlapi",
           "Port": 8000
         }
       ]
