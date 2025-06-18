@@ -119,7 +119,7 @@ namespace PARTS.API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Транзакція сфейлилась! Щось пішло не так у методі GetByIdAsync() - {ex.Message}");
+                _logger.LogError($"Транзакція сфейлилась! Щось пішло не так у методі GetNewOrderAsync() - {ex.Message}");
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }

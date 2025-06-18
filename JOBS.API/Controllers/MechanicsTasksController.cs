@@ -1,4 +1,5 @@
-﻿using JOBS.BLL.DTOs.Respponces;
+﻿using JOBS.BLL.Common.Helpers;
+using JOBS.BLL.DTOs.Respponces;
 using JOBS.BLL.Operations.MechanicsTasks.Commands;
 using JOBS.BLL.Operations.MechanicsTasks.Queries;
 using MediatR;
@@ -165,6 +166,22 @@ namespace JOBS.API.Controllers
             {
                 await Mediator.Send(comand);
                 return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpGet("GetTasksPaginated")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<Pagination<MechanicsTasksDTO>>> GetTasksPaginatedAsync([FromQuery] GetMechanicsTasksPaginatedQuery query)
+        {
+            try
+            {
+                var result = await Mediator.Send(query);
+                return Ok(result);
             }
             catch (Exception ex)
             {
