@@ -1,0 +1,33 @@
+paths:
+  # Models
+  models:
+    lstm_model: "Models/lstm_model.keras"
+    best_model: "Models/lstm_model.keras"
+    checkpoint: "Models/lstm_model.keras"
+
+  # Data files
+  data:
+    mechanic_data: "Data/mechanic_data.csv"
+    stopwords: "Data/stopwords_ua.txt"
+
+  # Helpers
+  helpers:
+    tokenizer: "Helpers/tokenizer.joblib"
+    label_encoder: "Helpers/label_encoder.joblib"
+
+# Model parameters
+model:
+  embedding_dim: 128
+  lstm_units: 256
+  dense_units1: 128
+  dense_units2: 64
+  max_words: 7000
+  confidence_threshold: 0.7
+
+# Training parameters
+training:
+  test_size: 0.2
+  random_state: 42
+  epochs: 5
+  batch_size: 100
+  patience: 5
