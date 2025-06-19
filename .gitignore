@@ -382,3 +382,17 @@ FodyWeavers.xsd
 /PARTS.API/models.json
 /PARTS.API/Part.json
 /PARTS.DAL/Seeders/PartsData.cs
+
+
+
+/PartsRecomendation/model_lstm_best.pth
+/PartsRecomendation/data/parts_recommendations.csv\
+
+
+*venv*
+
+
+
+*.venv*
+/PartsRecomendation/data/parts_recommendations.csv
+/PartsRecomendation/.idea
