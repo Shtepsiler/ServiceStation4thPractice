@@ -376,8 +376,8 @@ namespace API.GATEWAY
         public bool LogRequestBody { get; set; } = false;
         public bool LogResponseBody { get; set; } = false;
         public bool LogCookies { get; set; } = false;
-        public int MaxBodySizeToLog { get; set; } = 32 * 1024; // 32KB
-        public int SlowRequestThresholdMs { get; set; } = 5000; // 5 seconds
+        public int MaxBodySizeToLog { get; set; } = 64 * 1024; // 64KB
+        public int SlowRequestThresholdMs { get; set; } = 20000; // 20 seconds
     }
 
     // Data models

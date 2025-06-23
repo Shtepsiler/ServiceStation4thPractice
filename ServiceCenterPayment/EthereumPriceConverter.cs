@@ -1,10 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ServiceCenterPayment
 {
@@ -14,8 +9,9 @@ namespace ServiceCenterPayment
         public static decimal? Price;
         public static async Task<BigInteger> ConvertUsdToEtherAsync(decimal usdAmount, int decimals)
         {
-            if(Price == null)
-                Price = await GetEthereumPriceAsync();
+            if (Price == null)
+                //     Price = await GetEthereumPriceAsync();
+                Price = 2357.50M;
 
             decimal ethAmount = usdAmount / Price.Value;
 

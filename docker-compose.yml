@@ -108,10 +108,10 @@ services:
     networks:
       - ServiceStationPartsNetwork
     ports:
-      - "2030:8084"
+      - "2030:8083"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:8084
+      - ASPNETCORE_URLS=http://+:8083
       - REDIS=RedisCash:6379
       - DB_HOST=PartsDatabase
       - DB_USER=sa
@@ -143,10 +143,10 @@ services:
     networks:
       - ServiceStationPartsNetwork
     ports:
-      - "2040:8083"
+      - "2040:8082"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:8083
+      - ASPNETCORE_URLS=http://+:8082
       - REDIS=RedisCash:6379
       - DB_HOST=JobsDatabase      
       - DB_USER=sa
@@ -178,10 +178,10 @@ services:
     networks:
       - ServiceStationPartsNetwork
     ports:
-      - "2050:8082"
+      - "2050:8081"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:8082
+      - ASPNETCORE_URLS=http://+:8081
       - REDIS=RedisCash:6379
       - DB_HOST=IdentityDatabase
       - DB_USER=sa
@@ -211,13 +211,13 @@ services:
     networks:
       - ServiceStationPartsNetwork
     ports:
-      - "2060:8081"
+      - "2060:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:8081
-      - PARTS_API_URL=http://partsapi:8084
-      - JOBS_API_URL=http://jobsapi:8083
-      - IDENTITY_API_URL=http://identityapi:8082
+      - ASPNETCORE_URLS=http://+:8080
+      - PARTS_API_URL=http://partsapi:8083
+      - JOBS_API_URL=http://jobsapi:8082
+      - IDENTITY_API_URL=http://identityapi:8081
     depends_on:
       identity.api:
         condition: service_started

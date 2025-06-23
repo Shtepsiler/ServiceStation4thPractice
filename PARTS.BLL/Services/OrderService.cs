@@ -26,7 +26,7 @@ namespace PARTS.BLL.Services
             this.repository = repository;
             serviceCenterPaymentFactory = serviceCenterPayment;
             this.context = context;
-            //  OnPriceUpdated += ChangePrice;
+            OnPriceUpdated += ChangePrice;
         }
         // Делегат для оновлення ціни
         public delegate Task PriceUpdatedHandler(Guid orderId);

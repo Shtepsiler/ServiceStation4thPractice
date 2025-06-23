@@ -13,7 +13,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "mlapi",
-          "Port": 8000
+          "Port": "8000"
         }
       ]
     }

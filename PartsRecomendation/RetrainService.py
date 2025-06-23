@@ -383,6 +383,7 @@ class RetrainService:
                              strategy=self.config.TRANSFER_LEARNING_MODE,
                              data_size=len(learning_data),
                              baseline_performance=baseline_performance)
+            ver =  getattr(self.model_service, 'model_version', 'unknown')
 
             return {
                 'success': True,
@@ -1341,11 +1342,14 @@ class RetrainService:
 
             # Verify final model file
             final_size = os.path.getsize(self.model_service.model_path)
-
+            old_version = self.model_service.model_version
+            new_version = self.model_service.increment_version()
             self.logger.info("retrained_model_deployed_sync",
                              vocab_size=len(vocab),
                              num_classes=len(mlb.classes_),
-                             model_size_bytes=final_size)
+                             model_size_bytes=final_size,
+                             old_version=old_version,
+                             new_version=new_version)
 
             return True
 

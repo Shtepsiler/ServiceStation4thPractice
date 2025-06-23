@@ -14,7 +14,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "partsapi",
-          "Port": "8084"
+          "Port": "8083"
         }
       ]
 
@@ -27,7 +27,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "partsapi",
-          "Port": "8084"
+          "Port": "8083"
         }
       ],
       "UpstreamPathTemplate": "/parts/{everything}",

@@ -14,7 +14,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "identityapi",
-          "Port":  "8082"
+          "Port":  "8081"
         }
       ]
 
@@ -34,7 +34,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "identityapi",
-          "Port": "8082"
+          "Port": "8081"
         }
       ]
 

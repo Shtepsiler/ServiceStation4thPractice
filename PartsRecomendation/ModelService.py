@@ -17,11 +17,30 @@ class ModelService:
         self.model = None
         self.vocab = {}
         self.mlb = None
-        self.model_version = "1.0.0"
+        self.model_version = self._load_version_from_checkpoint()
         self.model_path = model_path
         self.enable_jit = False  # Відключи JIT для сумісності з retraining
         self._load_model()
 
+    def _load_version_from_checkpoint(self) -> int:
+        """Завантаж версію з checkpoint"""
+        try:
+            if os.path.exists(self.model_path):
+                checkpoint = torch.load(self.model_path, map_location='cpu')
+                version = checkpoint.get('model_version', 1)
+                self.logger.info("model_version_loaded", version=version)
+                return version
+            else:
+                return 1  # Нова модель
+        except Exception as e:
+            self.logger.warning("version_load_failed", error=str(e))
+            return 1
+
+    def increment_version(self):
+        """Збільш версію на 1"""
+        self.model_version += 1
+        self.logger.info("model_version_incremented", new_version=self.model_version)
+        return self.model_version
     def _load_model(self):
         """Load the trained LSTM model with memory optimization and backward compatibility"""
         try:
